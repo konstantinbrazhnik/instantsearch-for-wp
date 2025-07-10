@@ -1,0 +1,104 @@
+bug-fix:
+  label: Bug Fix
+  permalink: /bug-fix
+  description: Bug Fixes
+
+new-feature:
+  label: New Feature
+  permalink: /new-feature
+  description: New Features
+
+beaver-builder:
+  label: Beaver Builder
+  permalink: /beaver-builder
+  description: Beaver Builder integrations
+
+shortcode:
+  label: Shortcode
+  permalink: /shortcode
+  description: Shortcode improvements
+
+cpt-sync:
+  label: CPTSync
+  permalink: /cpt-sync
+  description: CPTSync improvements
+
+content-corral:
+  label: Content Corral
+  permalink: /content-corral
+  description: Content Corral improvements
+
+yoko-logger:
+  label: Yoko Logger
+  permalink: /yoko-logger
+  description: Yoko Logger improvements
+
+searchwp:
+  label: SearchWP
+  permalink: /searchwp
+  description: SearchWP improvements
+
+documentation:
+  label: Documentation
+  permalink: /documentation
+  description: Documentation improvements
+
+yoko-yml:
+  label: Yoko YML
+  permalink: /yoko-yml
+  description: Yoko YML improvements
+
+pdf-viewer:
+  label: PDF Viewer
+  permalink: /pdf-viewer
+  description: PDF Viewer improvements
+
+add-to-calendar:
+  label: Add to Calendar
+  permalink: /add-to-calendar
+  description: Add to Calendar improvements
+
+admin-columns:
+  label: Admin Dashboard
+  permalink: /admin-dashboard
+  description: Admin Dashboard improvements
+
+admin:
+  label: WP Admin
+  permalink: /admin
+  description: WP Admin improvements
+
+acf:
+  label: Advanced Custom Fields
+  permalink: /acf
+  description: Advanced Custom Fields integrations
+
+gutenberg:
+  label: Gutenberg
+  permalink: /gutenberg
+  description: Gutenberg improvements
+
+full-site-editing:
+  label: Full Site Editing
+  permalink: /full-site-editing
+  description: Full Site Editing improvements
+
+ai:
+  label: AI
+  permalink: /ai
+  description: AI improvements
+
+wp2fa:
+  label: WP2FA
+  permalink: /wp2fa
+  description: Integrations with the WP2FA plugin
+
+typesense:
+  label: Typesense
+  permalink: /typesense
+  description: Typesense integration
+
+content-protection:
+  label: Content Protection
+  permalink: /content-protection
+  description: Content Protection improvements
