@@ -23,6 +23,9 @@ build/Release
 # Dependency directories
 node_modules/
 
+# Lock files (managed by package.json)
+package-lock.json
+
 # Optional npm cache directory
 .npm
 
