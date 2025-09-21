@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-**InstantSearch for WP** is a WordPress plugin that provides a set of Gutenberg Blocks for InstantSearch.js widgets, enabling powerful search functionality through Typesense integration. This plugin is developed by Yoko Co and follows WordPress coding standards and modern development practices.
+**InstantSearch for WP** is a WordPress plugin that provides a set of Gutenberg Blocks for InstantSearch.js widgets, enabling powerful search functionality through with search providers like Aloglia, Typesense, and Melei search. This plugin follows WordPress coding standards and modern development practices.
 
 ### Core Functionality
 - **InstantSearch.js Integration**: Provides search UI components as Gutenberg blocks
-- **Typesense Backend**: Fast, typo-tolerant search engine integration
+- **Typesense/Algolia/Meleisearch Backend**: Fast, typo-tolerant search engine integration
 - **WordPress Integration**: Native WordPress admin, user management, and content indexing
 - **Gutenberg Blocks**: Modern block-based approach for search interface building
 - **Performance Optimized**: Efficient search indexing and caching strategies
