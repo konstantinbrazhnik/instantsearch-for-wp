@@ -279,6 +279,19 @@ npm run typesense:dashboard
 - **Database queries**: Optimize and cache when possible
 - **Search indexing**: Batch operations for large datasets
 
+## Documentation
+
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
+
+Use the following Context7 library paths for reference:
+ - WordPress: /websites/developer_wordpress
+ - WordPress Coding Standards: /wordpress/wordpress-coding-standards
+ - Typesense: /websites/typesense
+ - InstantSearch.js: /algolia/instantsearch
+ - Algolia: /websites/algolia-doc
+
 ## Troubleshooting
 
 ### Common Issues
@@ -338,6 +351,12 @@ npm test && composer test
 - **PHPCS**: PHP code standards checking
 - **Husky**: Git hooks for code quality
 - **WordPress CLI**: Command-line WordPress management
+
+## Contribution Guidelines
+
+- Fork the repository and create a feature branch off of the `develop` branch
+- Follow coding standards and write tests for new functionality
+- Submit a pull request with a clear description of changes
 
 ---
 
