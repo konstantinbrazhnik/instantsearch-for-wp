@@ -8,6 +8,7 @@
 - **InstantSearch.js Integration**: Provides search UI components as Gutenberg blocks
 - **Typesense/Algolia/Meleisearch Backend**: Fast, typo-tolerant search engine integration
 - **WordPress Integration**: Native WordPress admin, user management, and content indexing
+- **Plugin Settings/Configuration**: The plugin settings/configuration page should operate like an SPA using React Bootstrap and WordPress's native Backbone.js client.
 - **Gutenberg Blocks**: Modern block-based approach for search interface building
 - **Performance Optimized**: Efficient search indexing and caching strategies
 
@@ -291,6 +292,7 @@ Use the following Context7 library paths for reference:
  - Typesense: /websites/typesense
  - InstantSearch.js: /algolia/instantsearch
  - Algolia: /websites/algolia-doc
+ - React Bootstrap: /react-bootstrap/react-bootstrap
 
 ## Troubleshooting
 
