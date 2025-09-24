@@ -4,7 +4,9 @@
     "require": {
         "woocommerce/action-scheduler": "^3.6",
         "appsero/client": "^2.0",
-        "typesense/typesense-php": "^5.1"
+        "typesense/typesense-php": "^5.1",
+        "algolia/algoliasearch-client-php": "^4.0",
+        "symfony/http-client": "^6.4"
     },
     "autoload": {
         "psr-4": {

@@ -2,24 +2,24 @@
 /**
  * Plugin Name:       InstantSearch for WP
  * Plugin URI:        https://www.yokoco.com
- * Description:       The core plugin for Yoko Co WordPress sites.
+ * Description:       A provider agnostic implementation of InstantSearch.js for WordPress.
  * Author:            Yoko Co <developer@yokoco.com>
  * Author URI:        https://www.yokoco.com
- * Text Domain:       yoko-core
+ * Text Domain:       instantsearch-for-wp
  * Domain Path:       /languages
- * Version:           1.13.0
- * GitHub Plugin URI: https://github.com/Yoko-Co/yoko-core
+ * Version:           1.0.0
+ * GitHub Plugin URI: https://github.com/Yoko-Co/instantsearch-for-wp
  * Release Asset:     true
  * Primary Branch:    main
  *
  * @package         YokoCo
  */
 
-namespace YokoCo;
+namespace InstantSearchForWP;
 
 define( 'INSTANTSEARCH_FOR_WP_PATH', __DIR__ );
 define( 'INSTANTSEARCH_FOR_WP_FILE', __FILE__ );
-define( 'INSTANTSEARCH_FOR_WP_VERSION', '1.13.0' );
+define( 'INSTANTSEARCH_FOR_WP_VERSION', '1.0.0' );
 define( 'INSTANTSEARCH_FOR_WP_URL', plugin_dir_url( __FILE__ ) );
 
 if ( is_dir( plugin_dir_path( __FILE__ ) . '/lib' ) ) {
@@ -69,7 +69,7 @@ class InstantSearchForWP {
 	 */
 	public function init() {
 		load_plugin_textdomain(
-			'yoko',
+			'instantsearch-for-wp',
 			false,
 			basename( __DIR__ ) . '/languages'
 		);
@@ -80,6 +80,8 @@ class InstantSearchForWP {
 			update_option( $activated_plugin_setting, INSTANTSEARCH_FOR_WP_VERSION );
 			do_action( 'instantsearch_for_wp_plugin_updated', $activated_plugin_version, INSTANTSEARCH_FOR_WP_VERSION );
 		}
+
+		new Initializer();
 
 		// Run plugin init code here.
 		do_action( 'instantsearch_for_wp_plugin_init' );
@@ -93,39 +95,3 @@ add_action(
 		$instantsearch_for_wp->plugins_loaded();
 	}
 );
-
-$GLOBALS['instantsearch_for_wp'] = new InstantSearchForWP();
-
-/**
- * Initialize the plugin tracker
- *
- * @return void
- */
-function appsero_init_tracker_yoko_core() {
-
-	global $appsero_client;
-
-	if ( ! class_exists( '\Appsero\Client' ) ) {
-		return;
-	}
-
-	// $appsero_client = new \Appsero\Client( '99cee498-ca8e-42b8-a2b4-5c2d837b1c3e', 'InstantSearch for WP', __FILE__ );
-
-	// Activate Appsero Insights Client.
-	$appsero_client->insights()
-					->add_plugin_data()
-					->hide_notice()
-					->init();
-
-	// If Appsero is active, track the activation.
-	$appsero_option = 'appsero_opt_in';
-	if ( isset( $appsero_client ) && ! get_option( $appsero_option ) ) {
-		try {
-			$appsero_client->insights()->optin();
-			update_option( $appsero_option, 1, true );
-		} catch ( \Throwable $th ) {
-			error_log( 'Appsero optin failed: ' . $th->getMessage() );
-		}
-	}
-}
-appsero_init_tracker_yoko_core();
