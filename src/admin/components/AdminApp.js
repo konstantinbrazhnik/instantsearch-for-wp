@@ -14,9 +14,14 @@ import {
 } from '@wordpress/components';
 import ProviderConfig from './ProviderConfig';
 import { Notices } from './Notices';
+import useSettings from '../hooks/use-settings';
 
 const AdminApp = () => {
     const [activeScreen, setActiveScreen] = useState('provider');
+
+	const {
+		provider
+	} = useSettings();
 
     // Hash-based routing
     useEffect(() => {
@@ -27,7 +32,7 @@ const AdminApp = () => {
                 
             if (hash && allowedScreens.includes(hash)) {
                 setActiveScreen(hash);
-            } else if (!selectedProvider) {
+            } else if (!provider) {
                 setActiveScreen('provider');
             }
         };
@@ -38,7 +43,7 @@ const AdminApp = () => {
         return () => {
             window.removeEventListener('hashchange', handleHashChange);
         };
-    }, []);
+    }, [provider]);
 
     const handleProviderSelected = (provider) => {
         setSelectedProvider(provider);
