@@ -58,13 +58,6 @@ class InstantSearchForWP {
 	}
 
 	/**
-	 * Class initializer.
-	 */
-	public function plugins_loaded() {
-		add_action( 'init', array( $this, 'init' ) );
-	}
-
-	/**
 	 * Init all the things.
 	 */
 	public function init() {
@@ -92,6 +85,6 @@ add_action(
 	'plugins_loaded',
 	function () {
 		$instantsearch_for_wp = InstantSearchForWP::get_instance();
-		$instantsearch_for_wp->plugins_loaded();
+		$instantsearch_for_wp->init();
 	}
 );

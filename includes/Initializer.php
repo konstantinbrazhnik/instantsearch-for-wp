@@ -35,6 +35,12 @@ class Initializer {
 		new IndexingCriteria();
 
 		$this->get_provider();
+
+		new Settings();
+		// Initialize admin interface.
+		if ( is_admin() ) {
+			new Admin();
+		}
 	}
 
 	/**
