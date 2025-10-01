@@ -11,6 +11,7 @@ import useSettings from '../hooks/use-settings';
 const ProviderConfig = () => {
 	
 	const {
+		loading,
 		provider,
 		setProvider,
 		saveSettings
@@ -45,7 +46,7 @@ const ProviderConfig = () => {
 					]}
 					value={ provider }
 				/>
-				<Button variant="primary" onClick={ saveSettings } __next40pxDefaultSize>
+				<Button disabled={ loading } variant="primary" onClick={ saveSettings } __next40pxDefaultSize>
 					{ __('Save Provider', 'yoko-core') }
 				</Button>
 			</CardBody>
