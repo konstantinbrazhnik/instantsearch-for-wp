@@ -27,3 +27,26 @@
 	}
 }
 
+#instantsearch-admin {
+	.instantsearch-admin__notices:not(:empty) {
+		margin-block-end: 16px;
+	}
+
+	.instantsearch-admin__page {
+		display: flex;
+		gap: 16px;
+	}
+
+	.instantsearch-admin__content {
+		flex: 1;
+	}
+
+	.instantsearch-admin__navigation {
+		margin: 0;
+
+		button {
+			width: 100%;
+			justify-content: flex-start;
+		}
+	}
+}

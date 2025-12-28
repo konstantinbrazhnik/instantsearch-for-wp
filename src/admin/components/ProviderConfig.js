@@ -6,7 +6,8 @@ import {
     CardHeader,
 	SelectControl
 } from '@wordpress/components';
-import useSettings from '../hooks/use-settings';
+import AlgoliaConfig from './AlgoliaConfig';
+import { useAdminContext } from './AdminContext';
 
 const ProviderConfig = () => {
 	
@@ -15,7 +16,20 @@ const ProviderConfig = () => {
 		provider,
 		setProvider,
 		saveSettings
-	} = useSettings();
+	} = useAdminContext();
+
+	const renderProviderOptions = () => {
+		switch (provider) {
+			case 'algolia':
+				// Return Algolia specific configuration component
+				return <AlgoliaConfig />; // Placeholder for AlgoliaConfig component
+			case 'typesense':
+				// Return TypeSense specific configuration component
+				return null; // Placeholder for TypeSenseConfig component
+			default:
+				return null;
+		}
+	};
 
 	return (
 		<Card>
@@ -46,6 +60,9 @@ const ProviderConfig = () => {
 					]}
 					value={ provider }
 				/>
+
+				{ renderProviderOptions() }
+				<br />
 				<Button disabled={ loading } variant="primary" onClick={ saveSettings } __next40pxDefaultSize>
 					{ __('Save Provider', 'yoko-core') }
 				</Button>

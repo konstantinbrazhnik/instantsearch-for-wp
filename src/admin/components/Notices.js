@@ -12,7 +12,11 @@ const Notices = () => {
 		return null;
 	}
 
-	return <NoticeList notices={ notices } onRemove={ removeNotice } />;
+	return <NoticeList
+		className="instantsearch-admin__notices"
+		notices={ notices }
+		onRemove={ removeNotice }
+	/>;
 };
 
 export { Notices };

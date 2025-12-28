@@ -7,6 +7,7 @@ import { useDispatch } from '@wordpress/data';
 const useSettings = () => {
 
 	const [ provider, setProvider ] = useState();
+	const [ algoliaConfig, setAlgoliaConfig ] = useState({});
 	const [ postTypes, setPostTypes ] = useState();
 	const [loading, setLoading] = useState(true);
 
@@ -20,6 +21,7 @@ const useSettings = () => {
 			console.log(settings);
 			setProvider( settings.instantsearch_for_wp_settings?.provider || 'algolia' );
 			setPostTypes( settings.instantsearch_for_wp_settings?.post_types || [] );
+			setAlgoliaConfig( settings.instantsearch_for_wp_settings?.algolia || {} );
 			setLoading(false);
 		} );
 	}, [] );
@@ -33,6 +35,7 @@ const useSettings = () => {
 				instantsearch_for_wp_settings: {
 					provider,
 					post_types: postTypes,
+					algolia: algoliaConfig
 				},
 			},
 		} ).then( () => {
@@ -50,6 +53,9 @@ const useSettings = () => {
 	};
 
 	return {
+		algoliaConfig,
+		setAlgoliaConfig,
+		loading,
 		provider,
 		setProvider,
 		postTypes,

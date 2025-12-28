@@ -1,27 +1,24 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { 
+import {
     Card, 
     CardBody, 
-    CardHeader, 
-    Navigation, 
-    NavigationMenu, 
-    NavigationItem,
-    Panel,
-    PanelBody,
-	SelectControl
+    CardHeader,
+	Spinner
 } from '@wordpress/components';
 import ProviderConfig from './ProviderConfig';
 import { Notices } from './Notices';
-import useSettings from '../hooks/use-settings';
+import AdminNavigation from './AdminNavigation';
+import { useAdminContext } from './AdminContext';
 
 const AdminApp = () => {
     const [activeScreen, setActiveScreen] = useState('provider');
 
 	const {
+		loading,
 		provider
-	} = useSettings();
+	} = useAdminContext();
 
     // Hash-based routing
     useEffect(() => {
@@ -45,13 +42,9 @@ const AdminApp = () => {
         };
     }, [provider]);
 
-    const handleProviderSelected = (provider) => {
-        setSelectedProvider(provider);
-    };
-
     const handleScreenChange = (screen) => {
         // Prevent navigation if provider not selected (except to provider screen)
-        if (!selectedProvider && screen !== 'provider') {
+        if (!provider && screen !== 'provider') {
             return;
         }
         setActiveScreen(screen);
@@ -61,7 +54,7 @@ const AdminApp = () => {
     const renderScreen = () => {
         switch (activeScreen) {
             case 'provider':
-				return (<ProviderConfig onProviderSelected={handleProviderSelected} />);
+				return (<ProviderConfig />);
             case 'credentials':
             case 'post-types':
             case 'indexing':
@@ -80,30 +73,19 @@ const AdminApp = () => {
         }
     };
 
-    // Navigation items - order changes based on whether provider is selected
-    const getNavigationItems = () => {
-        return [
-			{ id: 'indexing', label: __('Indexing', 'yoko-core'), icon: 'update' },
-			{ id: 'credentials', label: __('Server Credentials', 'yoko-core'), icon: 'admin-network' },
-			{ id: 'post-types', label: __('Post Types', 'yoko-core'), icon: 'admin-post' },
-			{ id: 'analytics', label: __('Analytics (Coming Soon)', 'yoko-core'), icon: 'chart-area', disabled: true },
-			{ id: 'provider', label: __('Provider Setup', 'yoko-core'), icon: 'admin-settings' }
-		];
-    };
-
-    const navigationItems = getNavigationItems();
-
     return (
         <div id="instantsearch-admin">
 			
 			<Notices />
-            
-            <div className="instantsearch-admin__content">
-                {renderScreen()}
-            </div>
+			
+			<div className="instantsearch-admin__page">
+				<AdminNavigation handleScreenChange={handleScreenChange} />
+				<div className="instantsearch-admin__content">
+					{loading ? <Spinner /> : renderScreen()}
+				</div>
+			</div>
         </div>
     );
 };
 
 export default AdminApp;
-

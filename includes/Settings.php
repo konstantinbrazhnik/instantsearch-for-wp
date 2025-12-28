@@ -23,6 +23,11 @@ class Settings {
 		$default = array(
 			'provider'   => 'algolia',
 			'post_types' => $public_post_types,
+			'algolia'    => array(
+				'app_id'               => '',
+				'search_only_api_key'  => '',
+				'admin_api_key'        => '',
+			),
 		);
 		$schema  = array(
 			'type'       => 'object',
@@ -39,6 +44,20 @@ class Settings {
 					'uniqueItems' => true,
 					'items'       => array(
 						'type' => 'string',
+					),
+				),
+				'algolia' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'app_id'  => array(
+							'type' => 'string',
+						),
+						'search_only_api_key' => array(
+							'type' => 'string',
+						),
+						'admin_api_key' => array(
+							'type' => 'string',
+						),
 					),
 				),
 			),

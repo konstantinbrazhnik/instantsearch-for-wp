@@ -3,6 +3,7 @@ import domReady from '@wordpress/dom-ready';
 import { render } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import AdminApp from './components/AdminApp';
+import { AdminProvider } from './components/AdminContext';
 
 // Import styles
 // import './admin.scss';
@@ -11,7 +12,7 @@ import AdminApp from './components/AdminApp';
 domReady(() => {
     const adminAppElement = document.getElementById('instantsearch-admin-app');
     if (adminAppElement) {
-        render(<AdminApp />, adminAppElement);
+        render(<AdminProvider><AdminApp /></AdminProvider>, adminAppElement);
     }
 });
 
