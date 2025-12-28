@@ -6,7 +6,8 @@
         "appsero/client": "^2.0",
         "typesense/typesense-php": "^5.1",
         "algolia/algoliasearch-client-php": "^4.0",
-        "symfony/http-client": "^6.4"
+        "symfony/http-client": "^6.4",
+        "freemius/wordpress-sdk": "^2.13"
     },
     "autoload": {
         "psr-4": {
@@ -23,7 +24,6 @@
         }
     ],
 	"config": {
-		"vendor-dir": "lib",
         "allow-plugins": {
             "php-http/discovery": true,
             "dealerdirect/phpcodesniffer-composer-installer": true
