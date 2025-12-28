@@ -3,7 +3,6 @@
     "description": "InstantSearch for WP is a set of Gutenberg Blocks of InstantSearch.js widgets.",
     "require": {
         "woocommerce/action-scheduler": "^3.6",
-        "appsero/client": "^2.0",
         "typesense/typesense-php": "^5.1",
         "algolia/algoliasearch-client-php": "^4.0",
         "symfony/http-client": "^6.4",
