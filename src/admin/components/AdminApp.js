@@ -11,9 +11,11 @@ import ProviderConfig from './ProviderConfig';
 import { Notices } from './Notices';
 import AdminNavigation from './AdminNavigation';
 import { useAdminContext } from './AdminContext';
+import AdminDashboard from './AdminDashboard';
+import IndexConfig from './IndexConfig';
 
 const AdminApp = () => {
-    const [activeScreen, setActiveScreen] = useState('provider');
+    const [activeScreen, setActiveScreen] = useState('dashboard');
 
 	const {
 		loading,
@@ -25,13 +27,15 @@ const AdminApp = () => {
         const handleHashChange = () => {
             const hash = window.location.hash.substr(1);
             // Only allow navigation to certain screens if provider is selected
-            const allowedScreens = ['provider', 'credentials', 'post-types', 'indexing', 'analytics'];
+            const allowedScreens = ['provider', 'dashboard', 'indexing', 'analytics'];
                 
             if (hash && allowedScreens.includes(hash)) {
                 setActiveScreen(hash);
             } else if (!provider) {
                 setActiveScreen('provider');
-            }
+            } else {
+				setActiveScreen('dashboard');
+			}
         };
 
         window.addEventListener('hashchange', handleHashChange);
@@ -55,9 +59,10 @@ const AdminApp = () => {
         switch (activeScreen) {
             case 'provider':
 				return (<ProviderConfig />);
-            case 'credentials':
-            case 'post-types':
+            case 'dashboard':
+				return <AdminDashboard />;
             case 'indexing':
+				return <IndexConfig />;
             case 'analytics':
             default:
                 return (
