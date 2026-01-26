@@ -22,7 +22,7 @@ const useSettings = () => {
 	useEffect( () => {
 		apiFetch( { path: '/instantsearch-for-wp/v1/settings' } ).then( ( settings ) => {
 			console.log(settings);
-			setProvider( settings?.provider || 'algolia' );
+			setProvider( settings?.provider || null );
 			setAlgoliaConfig( settings?.algolia || {} );
 			setSettings(settings || {});
 			setInitialLoading(false);

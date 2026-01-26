@@ -18,6 +18,7 @@ const AdminApp = () => {
     const [activeScreen, setActiveScreen] = useState('index');
 
 	const {
+		algoliaConfig,
 		initialLoading,
 		provider
 	} = useAdminContext();
@@ -27,7 +28,7 @@ const AdminApp = () => {
         const handleHashChange = () => {
             const hash = window.location.hash.substr(1);
             // Only allow navigation to certain screens if provider is selected
-            const allowedScreens = ['provider', 'search', 'index', 'analytics'];
+            const allowedScreens = ['provider', 'index', 'analytics'];
                 
             if (hash && allowedScreens.includes(hash)) {
                 setActiveScreen(hash);
@@ -59,8 +60,6 @@ const AdminApp = () => {
         switch (activeScreen) {
             case 'provider':
 				return (<ProviderConfig />);
-            case 'search':
-				return <SearchConfiguration />;
             case 'index':
 				return <AdminIndexes />;
             case 'analytics':

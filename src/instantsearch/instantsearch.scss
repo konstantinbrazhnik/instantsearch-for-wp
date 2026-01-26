@@ -19,6 +19,7 @@
 
 	// Set Variables.
 	--isfwp-gap-spacing: 3rem;
+	--isfwp-site-search-container-width: 1200px;
 }
 
 .isfwp-site-search-topbar {
@@ -44,7 +45,7 @@
 }
 
 .isfwp-site-search-container {
-	max-width: 1024px;
+	max-width: var( --isfwp-site-search-container-width );
 	margin: 0 auto;
 	padding: 32px 0;
 	width: 100%;
@@ -86,6 +87,7 @@
 
 #isfwp-site-search-sidebar {
 	width: 33.3333333%;
+	max-width: 300px;
 	order: 0;
 }
 

@@ -29,7 +29,7 @@ const search = instantsearch({
 search.addWidgets([
 	configure({
 		distinct: true,
-		attributesToSnippet: ['content:20'],
+		attributesToSnippet: [`content:${instantSearchForWPFrontend?.sitesearchSettings?.snippet_length || 50}`],
 		snippetEllipsisText: '…',
 	}),
 	// Add your widgets here
@@ -106,7 +106,10 @@ dialog.on('show', async () => {
 	} else {
 		const searchInput = container.querySelector('#isfwp-site-search-input input');
 		if (searchInput) {
-			searchInput.focus();
+			setTimeout(() => {
+				searchInput.focus();
+			}, 100);
+			// Direct focus without timeout doesn't work in some browsers
 		}
 	}
 
@@ -116,6 +119,11 @@ dialog.on('show', async () => {
 // Enable body scroll on dialog hide
 dialog.on('hide', () => {
 	enableBodyScroll(container);
+	// Clear search state when dialog is closed
+	if (search?.helper) {
+		// Clear query + all facet/numeric/tag refinements + page back to 0
+		search.helper.setQuery('').clearRefinements().setPage(0).search();
+	}
 });
 
 // Bind close button
@@ -126,8 +134,6 @@ if (closeButton) {
 	});
 }
 
-window.isfwpDialog = dialog;
-
 // Open the dialog (for demonstration purposes, you might want to trigger this differently)
 // dialog.show();
 
@@ -135,7 +141,9 @@ window.isfwpDialog = dialog;
 document.querySelectorAll(instantSearchForWPFrontend.searchTriggerQuerySelectors).forEach((el) => {
 	el.addEventListener('click', (e) => {
 		e.preventDefault();
-		window.isfwpDialog.show();
+		dialog.show();
 	});
 });
+
+window.isfwpSiteSearch = { dialog, search };
 

@@ -38,7 +38,10 @@ class Settings {
 		'wp_block',
 		'wp_template',
 		'wp_template_part',
+		// Beaver Builder.
 		'fl-builder-template',
+		'fl-theme-layout',
+		'fl-builder-history',
 		'elementor_library',
 		'ct_template',
 		'popup',
@@ -102,14 +105,11 @@ class Settings {
 	public static function get_index_name( string $index_name = null ) {
 
 		if ( null === $index_name ) {
-			$indexes = self::get_settings( 'indexes' );
+			$index = new Index();
 
-			if ( ! empty( $indexes ) ) {
-				$index = $indexes[0];
-				if ( isset( $index['name'] ) && ! empty( $index['name'] ) ) {
-					$index_name = sanitize_title( $index['name'] );
-				}
-			} elseif ( null === $index_name ) {
+			if ( $index->name ) {
+				$index_name = $index->index_post->post_name;
+			} else {
 				$index_name = 'search';
 			}
 		}
@@ -145,7 +145,7 @@ class Settings {
 		$public_post_types = apply_filters( 'instantsearch_for_wp_default_indexable_post_types', $public_post_types );
 
 		return array(
-			'provider'            => 'algolia',
+			'provider'            => '',
 			'algolia'             => array(
 				'app_id'              => '',
 				'search_only_api_key' => '',
@@ -155,6 +155,7 @@ class Settings {
 			'sitesearch_settings' => array(
 				'placeholder_text' => __( 'Search...', 'instantsearch-for-wp' ),
 				'sidebar_position' => 'left',
+				'snippet_length'   => 50,
 			),
 		);
 	}
@@ -195,7 +196,7 @@ class Settings {
 				// Whethet to use an index for site search.
 				// Either a boolean or the name of the index to use.
 				'use_as_sitesearch' => array(
-					'type' => array( 'boolean', 'string' ),
+					'type'    => array( 'boolean', 'string' ),
 					'default' => false,
 				),
 				'sitesearch_settings' => array(

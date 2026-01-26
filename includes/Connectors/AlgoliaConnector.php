@@ -42,10 +42,14 @@ class AlgoliaConnector extends AbstractConnector {
 
 		[ $app_id, $api_key ] = $this->get_credentials();
 
-		$this->client = SearchClient::create( $app_id, $api_key );
+		try {
+			$this->client = SearchClient::create( $app_id, $api_key );
 
-		// Trigger index settings update when indexes post type changes are saved.
-		add_action( 'save_post_' . Index::$cpt_slug, array( $this, 'update_index_settings' ), 10, 2 );
+			// Trigger index settings update when indexes post type changes are saved.
+			add_action( 'save_post_' . Index::$cpt_slug, array( $this, 'update_index_settings' ), 10, 2 );
+		} catch ( \Throwable $th ) {
+			//throw $th;
+		}
 	}
 
 	/**
@@ -291,7 +295,7 @@ class AlgoliaConnector extends AbstractConnector {
 		}
 
 		$index_settings = array(
-			'searchableAttributes'  => $searchable_attributes,
+			'searchableAttributes'  => array_merge( $searchable_attributes, $facet_attributes ),
 			'attributesForFaceting' => $attributes_for_faceting,
 			'distinct'              => 1,
 			'attributeForDistinct'  => 'postID',

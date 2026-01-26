@@ -108,17 +108,18 @@ class Admin {
 			);
 		}
 
+		$instantsearch_admin_data = array(
+			'apiUrl'      => rest_url( 'instantsearch/v1/' ),
+			'nonce'       => wp_create_nonce( 'wp_rest' ),
+			'pluginUrl'   => INSTANTSEARCH_FOR_WP_URL,
+			'indexPrefix' => Settings::get_index_name( '' ),
+		);
+
 		// Localize script with configuration data.
 		wp_localize_script(
 			'instantsearch-admin',
 			'instantsearchAdmin',
-			array(
-				'apiUrl'      => rest_url( 'instantsearch/v1/' ),
-				'nonce'       => wp_create_nonce( 'wp_rest' ),
-				'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-				'pluginUrl'   => INSTANTSEARCH_FOR_WP_URL,
-				'indexPrefix' => Settings::get_index_name(),
-			)
+			$instantsearch_admin_data
 		);
 
 		wp_set_script_translations( 'instantsearch-admin', 'yoko-core' );

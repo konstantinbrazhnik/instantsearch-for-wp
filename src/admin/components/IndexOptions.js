@@ -42,7 +42,7 @@ const IndexOptions = ({ index, indexId }) => {
 
 	const handleSave = async () => {
 		setLoading(true);
-		await apiFetch( {
+		const newPost = await apiFetch( {
 			path: `/wp/v2/isfwp_index${indexCpt?.id ? `/${indexCpt.id}` : ''}`,
 			method: 'POST',
 			data: {
@@ -52,6 +52,10 @@ const IndexOptions = ({ index, indexId }) => {
 				status: 'publish',
 			},
 		} );
+		setIndexCpt(newPost);
+		createSuccessNotice(
+			__( 'Index saved successfully.', 'instantsearch-for-wp' )
+		);
 		setLoading(false);
 	};
 

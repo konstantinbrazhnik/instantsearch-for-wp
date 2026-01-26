@@ -58,6 +58,8 @@ class Index {
 			$this->index_post     = $index_post;
 			$this->index_settings = json_decode( $index_post->post_content, true );
 			$this->name           = Settings::get_index_name( $index_post->post_name );
+		} else {
+			$this->name = '';
 		}
 	}
 

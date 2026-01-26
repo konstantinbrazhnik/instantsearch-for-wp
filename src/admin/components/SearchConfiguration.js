@@ -1,8 +1,7 @@
-import { Button, SelectControl, TextControl, ToggleControl } from "@wordpress/components";
+import { Button, __experimentalNumberControl as NumberControl, SelectControl, TextControl, ToggleControl } from "@wordpress/components";
 import { useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { useAdminContext } from "./AdminContext";
-import FacetOverrides from "./siteSearch/FacetOverrides";
 
 const indexName = (indexCptName) => `${window.instantsearchAdmin.indexPrefix}${indexCptName}`;
 
@@ -56,6 +55,17 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 								sitesearch_settings: {
 									...prev.sitesearch_settings,
 									placeholder_text: value,
+								}
+							}))}
+						/>
+						<NumberControl
+							label={__('Snippet Length (in words)', 'instantsearch-for-wp')}
+							value={useSearchSettings?.sitesearch_settings?.snippet_length || 50}
+							onChange={(value) => setUseSearchSettings((prev) => ({
+								...prev,
+								sitesearch_settings: {
+									...prev.sitesearch_settings,
+									snippet_length: parseInt(value, 10),
 								}
 							}))}
 						/>
