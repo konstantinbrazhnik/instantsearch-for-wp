@@ -11,14 +11,14 @@ import ProviderConfig from './ProviderConfig';
 import { Notices } from './Notices';
 import AdminNavigation from './AdminNavigation';
 import { useAdminContext } from './AdminContext';
-import AdminDashboard from './AdminDashboard';
-import IndexConfig from './IndexConfig';
+import SearchConfiguration from './SearchConfiguration';
+import AdminIndexes from './AdminIndexes';
 
 const AdminApp = () => {
-    const [activeScreen, setActiveScreen] = useState('dashboard');
+    const [activeScreen, setActiveScreen] = useState('index');
 
 	const {
-		loading,
+		initialLoading,
 		provider
 	} = useAdminContext();
 
@@ -27,14 +27,14 @@ const AdminApp = () => {
         const handleHashChange = () => {
             const hash = window.location.hash.substr(1);
             // Only allow navigation to certain screens if provider is selected
-            const allowedScreens = ['provider', 'dashboard', 'indexing', 'analytics'];
+            const allowedScreens = ['provider', 'search', 'index', 'analytics'];
                 
             if (hash && allowedScreens.includes(hash)) {
                 setActiveScreen(hash);
             } else if (!provider) {
                 setActiveScreen('provider');
             } else {
-				setActiveScreen('dashboard');
+				setActiveScreen('index');
 			}
         };
 
@@ -59,21 +59,21 @@ const AdminApp = () => {
         switch (activeScreen) {
             case 'provider':
 				return (<ProviderConfig />);
-            case 'dashboard':
-				return <AdminDashboard />;
-            case 'indexing':
-				return <IndexConfig />;
+            case 'search':
+				return <SearchConfiguration />;
+            case 'index':
+				return <AdminIndexes />;
             case 'analytics':
             default:
                 return (
-                    <Card>
+                    <>
                         <CardHeader>
-                            <h2>{__('Instant Search for WordPress', 'yoko-core')}</h2>
+                            <h2>{__('Instant Search for WordPress', 'instantsearch-for-wp')}</h2>
                         </CardHeader>
                         <CardBody>
-							<p>{__('This section is under construction. Please check back later.', 'yoko-core')}</p>
+							<p>{__('This section is under construction. Please check back later.', 'instantsearch-for-wp')}</p>
                         </CardBody>
-                    </Card>
+                    </>
                 );
         }
     };
@@ -83,12 +83,14 @@ const AdminApp = () => {
 			
 			<Notices />
 			
-			<div className="instantsearch-admin__page">
-				<AdminNavigation handleScreenChange={handleScreenChange} />
-				<div className="instantsearch-admin__content">
-					{loading ? <Spinner /> : renderScreen()}
-				</div>
-			</div>
+			<Card className="instantsearch-admin__page">
+				<CardBody className="instantsearch-admin__navigation">
+					<AdminNavigation currentScreen={activeScreen} handleScreenChange={handleScreenChange} />
+				</CardBody>
+				<CardBody className="instantsearch-admin__content">
+					{initialLoading ? <Spinner /> : renderScreen()}
+				</CardBody>
+			</Card>
         </div>
     );
 };

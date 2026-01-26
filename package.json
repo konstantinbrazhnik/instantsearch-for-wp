@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "author": "Konstantin Brazhnik <konst@ntin.solutions>",
   "browserslist": {
-	"production": [
-		">0.2%",
-		"not dead",
-		"not op_mini all"
-	],
-	"development": [
-		"last 1 chrome version",
-		"last 1 firefox version",
-		"last 1 safari version"
-	]
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "scripts": {
     "build": "wp-scripts build --webpack-copy-php",
@@ -46,7 +46,9 @@
     "@wordpress/i18n": "^6.4.0",
     "@wordpress/icons": "^10.31.0",
     "@wordpress/notices": "^5.31.0",
+    "a11y-dialog": "^8.1.4",
     "alpinejs": "^3.14.1",
+    "body-scroll-lock": "^4.0.0-beta.0",
     "instantsearch.css": "^8.5.1",
     "instantsearch.js": "^4.7.0",
     "typesense-instantsearch-adapter": "^2.9.0"

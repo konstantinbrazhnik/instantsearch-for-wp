@@ -17,13 +17,11 @@ namespace InstantSearchForWP;
 class Initializer {
 
 	/**
-	 * Available search providers.
+	 * Singleton instance of the Initializer.
 	 *
-	 * @var array
+	 * @var Initializer|null
 	 */
-	private static array $providers = array(
-		'algolia' => Connectors\AlgoliaConnector::class,
-	);
+	public static ?Initializer $instance = null;
 
 	/**
 	 * Constructor to initialize the plugin components.
@@ -31,31 +29,32 @@ class Initializer {
 	 * @return void
 	 */
 	public function __construct() {
-		new IndexerHooks();
+		Index::init();
+		Indexer::get_instance();
 		new IndexingCriteria();
-
-		$this->get_provider();
 
 		new Settings();
 		// Initialize admin interface.
 		if ( is_admin() ) {
 			new Admin();
+		} else {
+			new SiteSearch();
+		}
+
+		if ( defined( 'REST_API_VERSION' ) ) {
+			new RestAPI();
 		}
 	}
 
 	/**
-	 * Get the search provider based on settings or environment.
+	 * Get the singleton instance of the Initializer.
 	 *
-	 * @return Connectors\AbstractConnector|null The connector instance or null if not found.
+	 * @return Initializer The singleton instance.
 	 */
-	public function get_provider() {
-		if ( defined( 'INSTANTSEARCH_FOR_WP_PROVIDER' ) && array_key_exists( INSTANTSEARCH_FOR_WP_PROVIDER, self::$providers ) ) {
-			$provider_class = self::$providers[ INSTANTSEARCH_FOR_WP_PROVIDER ];
-			return new $provider_class();
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
 		}
-
-		// TODO: Get provider from settings.
-
-		return null;
+		return self::$instance;
 	}
 }

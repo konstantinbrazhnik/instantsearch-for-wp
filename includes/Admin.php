@@ -113,10 +113,11 @@ class Admin {
 			'instantsearch-admin',
 			'instantsearchAdmin',
 			array(
-				'apiUrl'    => rest_url( 'instantsearch/v1/' ),
-				'nonce'     => wp_create_nonce( 'wp_rest' ),
-				'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
-				'pluginUrl' => INSTANTSEARCH_FOR_WP_URL,
+				'apiUrl'      => rest_url( 'instantsearch/v1/' ),
+				'nonce'       => wp_create_nonce( 'wp_rest' ),
+				'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+				'pluginUrl'   => INSTANTSEARCH_FOR_WP_URL,
+				'indexPrefix' => Settings::get_index_name(),
 			)
 		);
 

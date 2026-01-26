@@ -50,3 +50,23 @@
 		}
 	}
 }
+
+.instantsearch-admin__page {
+
+	& > div {
+		display: flex;
+		width: 100%;
+	}
+
+	.instantsearch-admin__navigation {
+		width: 100%;
+		max-width: 300px;
+		border-right: 1px solid #ddd;
+		padding-right: 16px;
+
+		&:first-of-type {
+			border-bottom-right-radius: 0;
+			border-top-right-radius: 0;
+		}
+	}
+}

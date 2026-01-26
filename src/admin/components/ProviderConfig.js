@@ -32,7 +32,7 @@ const ProviderConfig = () => {
 	};
 
 	return (
-		<Card>
+		<>
 			<CardHeader>
 				<h2>{__('Choose a Provider', 'yoko-core')}</h2>
 			</CardHeader>
@@ -63,11 +63,11 @@ const ProviderConfig = () => {
 
 				{ renderProviderOptions() }
 				<br />
-				<Button disabled={ loading } variant="primary" onClick={ saveSettings } __next40pxDefaultSize>
-					{ __('Save Provider', 'yoko-core') }
+				<Button disabled={ loading } variant="primary" onClick={ () => saveSettings() } __next40pxDefaultSize>
+					{ __('Save Provider', 'instantsearch-for-wp') }
 				</Button>
 			</CardBody>
-		</Card>
+		</>
 	);
 };
 

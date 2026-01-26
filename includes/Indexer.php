@@ -15,13 +15,24 @@ namespace InstantSearchForWP;
 /**
  * IndexerHooks class to manage post indexing.
  */
-class IndexerHooks {
+class Indexer {
+
+	/**
+	 * Available search providers.
+	 *
+	 * @var array
+	 */
+	private static array $providers = array(
+		'algolia' => Connectors\AlgoliaConnector::class,
+		// Future providers can be added here.
+	);
+
 	/**
 	 * The connector instance used for indexing operations.
 	 *
-	 * @var AbstractConnector
+	 * @var Connectors\AbstractConnector|null
 	 */
-	protected $connector;
+	public $provider;
 
 	/**
 	 * The hook name used to collect post IDs for indexing.
@@ -38,15 +49,56 @@ class IndexerHooks {
 	public static $delete_post_ids_hook = 'instantsearch_posts_to_delete';
 
 	/**
+	 * Singleton instance of the Indexer.
+	 *
+	 * @var Indexer|null
+	 */
+	public static $instance = null;
+
+	/**
 	 * Constructor to initialize the Indexer with a specific connector.
 	 *
 	 * @return void
 	 */
 	public function __construct() {
-
 		add_action( 'save_post', array( $this, 'index_post' ), 10, 3 );
 		add_action( 'delete_post', array( $this, 'delete_post' ) );
 		add_action( 'shutdown', array( $this, 'index_or_delete_posts' ) );
+
+		$this->provider = $this->get_provider();
+	}
+
+
+	/**
+	 * Get the search provider based on settings or environment.
+	 *
+	 * @return Connectors\AbstractConnector|null The connector instance or null if not found.
+	 */
+	public function get_provider() {
+		if ( defined( 'INSTANTSEARCH_FOR_WP_PROVIDER' ) && array_key_exists( INSTANTSEARCH_FOR_WP_PROVIDER, self::$providers ) ) {
+			$provider_class = self::$providers[ INSTANTSEARCH_FOR_WP_PROVIDER ];
+			return new $provider_class();
+		}
+
+		$provider = Settings::get_settings( 'provider' );
+		if ( $provider && array_key_exists( $provider, self::$providers ) ) {
+			$provider_class = self::$providers[ $provider ];
+			return new $provider_class();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the singleton instance of the Indexer.
+	 *
+	 * @return Indexer The singleton instance.
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
 	}
 
 	/**
@@ -84,18 +136,27 @@ class IndexerHooks {
 	/**
 	 * Index all posts that have been marked for indexing.
 	 *
-	 * @return void
+	 * @param array               $post_ids        Array of post IDs to index.
+	 * @param array               $delete_post_ids Array of post IDs to delete.
+	 * @param Index|\WP_Post|null $index           Index object.
+	 *
+	 * @return array Array containing responses for indexed and deleted posts.
 	 */
-	public function index_or_delete_posts() {
-		$post_ids = apply_filters( self::$index_post_ids_hook, array() );
+	public function index_or_delete_posts( $post_ids = array(), $delete_post_ids = array(), $index = null ) {
+		$post_ids = apply_filters( self::$index_post_ids_hook, $post_ids );
 		if ( ! empty( $post_ids ) ) {
-			do_action( 'instantsearch_index_posts', $post_ids );
+			$indexed_response = $this->provider->index_posts( $post_ids, $index );
 		}
 
-		$delete_post_ids = apply_filters( self::$delete_post_ids_hook, array() );
+		$delete_post_ids = apply_filters( self::$delete_post_ids_hook, $delete_post_ids );
 		if ( ! empty( $delete_post_ids ) ) {
-			do_action( 'instantsearch_delete_posts', $delete_post_ids );
+			$deleted_response = $this->provider->delete_posts( $delete_post_ids, $index );
 		}
+
+		return array(
+			'indexed' => $indexed_response ?? null,
+			'deleted' => $deleted_response ?? null,
+		);
 	}
 
 	/**
@@ -104,6 +165,6 @@ class IndexerHooks {
 	 * @param int $post_id Post ID.
 	 */
 	public function delete_post( $post_id ) {
-		do_action( 'instantsearch_delete_post', $post_id );
+		do_action( 'instantsearch_delete_posts', array( $post_id ) );
 	}
 }

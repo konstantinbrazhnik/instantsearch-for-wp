@@ -43,6 +43,18 @@ class IndexingCriteria {
 			return $should_index;
 		}
 
+		$indexes = Settings::get_settings( 'indexes' );
+		if ( ! empty( $indexes ) ) {
+			$index = $indexes[0];
+			if ( isset( $index['post_types'] ) && is_array( $index['post_types'] ) ) {
+				if ( in_array( $post->post_type, $index['post_types'], true ) ) {
+					return $should_index;
+				} else {
+					return false;
+				}
+			}
+		}
+
 		$public_post_types = get_post_types( array( 'public' => true ) );
 
 		$indexable_post_types = apply_filters( 'instantsearch_indexable_post_types', $public_post_types );

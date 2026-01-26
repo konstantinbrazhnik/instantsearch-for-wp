@@ -6,6 +6,7 @@ module.exports = {
 	entry: {
 		...defaultConfig.entry,
 		admin: path.resolve( process.cwd(), 'src/admin', 'index.js' ),
+		instantsearch: path.resolve( process.cwd(), 'src/instantsearch', 'index.js' ),
 	},
 };
 
