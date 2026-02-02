@@ -34,6 +34,7 @@ const AdminApp = () => {
                 setActiveScreen(hash);
             } else if (!provider) {
                 setActiveScreen('provider');
+				window.location.hash = 'provider';
             } else {
 				setActiveScreen('index');
 			}

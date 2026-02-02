@@ -2,5 +2,9 @@
 
 ## Road Map
 
-- [] Chunking
-- [] Distinct on post id
+- [X] Chunking
+- [X] Distinct on post id
+
+## Coming Up
+
+- [] Algolia custom ranking configuration on first sync so that it can be overriden after.

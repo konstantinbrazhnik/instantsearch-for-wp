@@ -13,7 +13,10 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 		settings
 	} = useAdminContext();
 	
-	const [useSearchSettings, setUseSearchSettings] = useState(settings);
+	const [useSearchSettings, setUseSearchSettings] = useState({
+		use_as_sitesearch: settings?.use_as_sitesearch || false,
+		sitesearch_settings: settings?.sitesearch_settings || {}
+	});
 	
 	const saveSearchSettings = async () => {
 		setLoading(true);

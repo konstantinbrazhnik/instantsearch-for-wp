@@ -45,7 +45,6 @@ const ProviderConfig = () => {
 					onChange={setProvider}
 					options={[
 						{
-							disabled: true,
 							label: 'Select a Provider',
 							value: ''
 						},
@@ -55,7 +54,8 @@ const ProviderConfig = () => {
 						},
 						{
 							label: 'TypeSense (Coming Soon)',
-							value: 'typesense'
+							value: 'typesense',
+							disabled: true
 						}
 					]}
 					value={ provider }

@@ -81,7 +81,7 @@ class Indexer {
 		}
 
 		$provider = Settings::get_settings( 'provider' );
-		if ( $provider && array_key_exists( $provider, self::$providers ) ) {
+		if ( $provider && is_string( $provider ) && array_key_exists( $provider, self::$providers ) ) {
 			$provider_class = self::$providers[ $provider ];
 			return new $provider_class();
 		}

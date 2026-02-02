@@ -22,12 +22,15 @@ const useSettings = () => {
 	useEffect( () => {
 		apiFetch( { path: '/instantsearch-for-wp/v1/settings' } ).then( ( settings ) => {
 			console.log(settings);
-			setProvider( settings?.provider || null );
-			setAlgoliaConfig( settings?.algolia || {} );
 			setSettings(settings || {});
 			setInitialLoading(false);
 		} );
 	}, [] );
+
+	useEffect( () => {
+		setProvider( settings?.provider || null );
+		setAlgoliaConfig( settings?.algolia || {} );
+	}, [settings]);
 
 	const saveSettings = (newSettings = {}) => {
 		setLoading(true);
@@ -42,7 +45,8 @@ const useSettings = () => {
 			data: {
 				instantsearch_for_wp_settings
 			},
-		} ).then( () => {
+		} ).then( (newSettings) => {
+			setSettings(newSettings?.instantsearch_for_wp_settings || {});
 			createSuccessNotice(
 				__( 'Settings saved.', 'instantsearch-for-wp' )
 			);

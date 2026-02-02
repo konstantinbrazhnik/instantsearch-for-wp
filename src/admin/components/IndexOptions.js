@@ -53,6 +53,7 @@ const IndexOptions = ({ index, indexId }) => {
 			},
 		} );
 		setIndexCpt(newPost);
+		setIndex(newPost.content?.raw ? JSON.parse(newPost.content.raw) : {} );
 		createSuccessNotice(
 			__( 'Index saved successfully.', 'instantsearch-for-wp' )
 		);
@@ -141,20 +142,19 @@ const IndexOptions = ({ index, indexId }) => {
 			<Button disabled={ loading } variant="primary" onClick={ handleSave } __next40pxDefaultSize>
 				{ __('Save Index', 'instantsearch-for-wp') }
 			</Button>
-			
-			<h4>{__( 'Reindex', 'instantsearch-for-wp' )}</h4>
-			<p>{__('Reindex all posts to update the search index. Do not close this page until the indexing is finished.', 'instantsearch-for-wp')}</p>
-			<HStack gap={ 2 } style={{ justifyContent: 'flex-start' }}>
-				<Button disabled={ indexing || loading } variant="primary" onClick={ handleIndexAll } __next40pxDefaultSize>
-					{ indexing ? __('Indexing...', 'instantsearch-for-wp') : __('Index All Posts', 'instantsearch-for-wp') }
-				</Button>
-				{indexing && <ProgressBar value={indexingProgress} style={{ flex: 1, width: '100%' }} />}
-				{indexing && indexedTotalPosts !== null && (<p>{__('Indexed Posts:', 'instantsearch-for-wp')}{indexPostsIndexed} / {indexedTotalPosts}</p>)}
-			</HStack>
 
 			{
 				indexCpt?.id && (
 					<>
+						<h4>{__( 'Reindex', 'instantsearch-for-wp' )}</h4>
+						<p>{__('Reindex all posts to update the search index. Do not close this page until the indexing is finished.', 'instantsearch-for-wp')}</p>
+						<HStack gap={ 2 } style={{ justifyContent: 'flex-start' }}>
+							<Button disabled={ indexing || loading } variant="primary" onClick={ handleIndexAll } __next40pxDefaultSize>
+								{ indexing ? __('Indexing...', 'instantsearch-for-wp') : __('Index All Posts', 'instantsearch-for-wp') }
+							</Button>
+							{indexing && <ProgressBar value={indexingProgress} style={{ flex: 1, width: '100%' }} />}
+							{indexing && indexedTotalPosts !== null && (<p>{__('Indexed Posts:', 'instantsearch-for-wp')}{indexPostsIndexed} / {indexedTotalPosts}</p>)}
+						</HStack>
 						<br />
 						<hr />
 						<SearchConfiguration index={_index} indexCpt={indexCpt} />
