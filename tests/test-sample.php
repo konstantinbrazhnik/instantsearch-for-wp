@@ -2,13 +2,13 @@
 /**
  * Class SampleTest
  *
- * @package Yoko_Algolia
+ * @package InstantSearch_For_WP
  */
 
 /**
  * Sample test case.
  */
-class SampleTest extends WP_UnitTestCase {
+class SampleTest extends \WP_UnitTestCase {
 
 	/**
 	 * A single example test.
