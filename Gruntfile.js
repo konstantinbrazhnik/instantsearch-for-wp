@@ -9,7 +9,7 @@ module.exports = function( grunt ) {
 
 		addtextdomain: {
 			options: {
-				textdomain: 'yoko-algolia',
+				textdomain: 'instantsearch-for-wp',
 			},
 			update_all_domains: {
 				options: {
@@ -32,8 +32,8 @@ module.exports = function( grunt ) {
 				options: {
 					domainPath: '/languages',
 					exclude: [ '\.git/*', 'bin/*', 'node_modules/*', 'tests/*' ],
-					mainFile: 'yoko-algolia.php',
-					potFilename: 'yoko-algolia.pot',
+					mainFile: 'instantsearch-for-wp.php',
+					potFilename: 'instantsearch-for-wp.pot',
 					potHeaders: {
 						poedit: true,
 						'x-poedit-keywordslist': true

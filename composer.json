@@ -1,14 +1,16 @@
 {
-    "name": "yoko-co/instantsearch-for-wp",
+    "name": "konstantinbrazhnik/instantsearch-for-wp",
     "description": "InstantSearch for WP is a set of Gutenberg Blocks of InstantSearch.js widgets.",
     "require": {
         "woocommerce/action-scheduler": "^3.6",
-        "appsero/client": "^2.0",
-        "typesense/typesense-php": "^5.1"
+        "typesense/typesense-php": "^5.1",
+        "algolia/algoliasearch-client-php": "^4.0",
+        "symfony/http-client": "^6.4",
+        "freemius/wordpress-sdk": "^2.13"
     },
     "autoload": {
         "psr-4": {
-            "YokoCo\\": "includes/"
+            "InstantSearchForWP\\": "includes/"
         },
 		"files": [
 			"includes/functions.php"
@@ -16,12 +18,11 @@
     },
     "authors": [
         {
-            "name": "Yoko Co",
-            "email": "developer@yokoco.com"
+            "name": "Konstantin Brazhnik",
+            "email": "konst@ntin.solutions"
         }
     ],
 	"config": {
-		"vendor-dir": "lib",
         "allow-plugins": {
             "php-http/discovery": true,
             "dealerdirect/phpcodesniffer-composer-installer": true

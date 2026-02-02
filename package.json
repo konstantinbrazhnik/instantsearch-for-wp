@@ -1,8 +1,19 @@
 {
-  "name": "yoko-core",
-  "version": "1.13.0",
-  "main": "build/index.js",
-  "author": "Yoko Co <developer@yokoco.com>",
+  "name": "instantsearch-for-wp",
+  "version": "1.0.0",
+  "author": "Konstantin Brazhnik <konst@ntin.solutions>",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "scripts": {
     "build": "wp-scripts build --webpack-copy-php",
     "format": "wp-scripts format",
@@ -16,7 +27,7 @@
     "typesense:mac:install": "curl -O https://dl.typesense.org/releases/28.0/typesense-server-28.0-darwin-arm64.tar.gz && tar -xzf typesense-server-28.0-darwin-arm64.tar.gz",
     "typesense:mac": "export TYPESENSE_API_KEY=xyz && mkdir -p \"$(pwd)\"/typesense-data && ./typesense-server --data-dir=\"$(pwd)\"/typesense-data --api-key=$TYPESENSE_API_KEY --enable-cors",
     "typesense:mac:cleanup": "rm -rf \"$(pwd)\"/typesense-data",
-	"typesense:dashboard": "git clone https://github.com/bfritscher/typesense-dashboard.git && cd typesense-dashboard && npm install && PUBLIC_PATH=\"/wp-content/plugins/yoko-core/assets/js/ts-dashboard\" npm run build && mv dist/* ../assets/js/ts-dashboard/ && cd .. && rm -rf typesense-dashboard"
+    "typesense:dashboard": "git clone https://github.com/bfritscher/typesense-dashboard.git && cd typesense-dashboard && npm install && PUBLIC_PATH=\"/wp-content/plugins/yoko-core/assets/js/ts-dashboard\" npm run build && mv dist/* ../assets/js/ts-dashboard/ && cd .. && rm -rf typesense-dashboard"
   },
   "devDependencies": {
     "@wordpress/scripts": "^30.12.0",
@@ -27,7 +38,17 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
+    "@wordpress/api-fetch": "^7.31.0",
+    "@wordpress/components": "^30.4.0",
+    "@wordpress/data": "^10.31.0",
+    "@wordpress/dom-ready": "^4.31.0",
+    "@wordpress/element": "^6.31.0",
+    "@wordpress/i18n": "^6.4.0",
+    "@wordpress/icons": "^10.31.0",
+    "@wordpress/notices": "^5.31.0",
+    "a11y-dialog": "^8.1.4",
     "alpinejs": "^3.14.1",
+    "body-scroll-lock": "^4.0.0-beta.0",
     "instantsearch.css": "^8.5.1",
     "instantsearch.js": "^4.7.0",
     "typesense-instantsearch-adapter": "^2.9.0"

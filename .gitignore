@@ -5,7 +5,7 @@ Thumbs.db
 wp-cli.local.yml
 *.sql
 *.tar.gz
-lib
+vendor
 
 # Logs
 logs
