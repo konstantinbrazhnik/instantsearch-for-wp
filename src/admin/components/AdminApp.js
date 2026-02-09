@@ -28,7 +28,7 @@ const AdminApp = () => {
         const handleHashChange = () => {
             const hash = window.location.hash.substr(1);
             // Only allow navigation to certain screens if provider is selected
-            const allowedScreens = ['provider', 'index', 'analytics'];
+            const allowedScreens = ['provider', 'index', 'search', 'analytics'];
                 
             if (hash && allowedScreens.includes(hash)) {
                 setActiveScreen(hash);
@@ -63,6 +63,8 @@ const AdminApp = () => {
 				return (<ProviderConfig />);
             case 'index':
 				return <AdminIndexes />;
+            case 'search':
+				return <SearchConfiguration />;
             case 'analytics':
             default:
                 return (

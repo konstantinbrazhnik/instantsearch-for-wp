@@ -12,6 +12,7 @@ const AdminNavigation = ({
 	const getNavigationItems = () => {
 		return [
 			{ value: 'index', label: __('Index', 'instantsearch-for-wp'), icon: 'update' },
+			{ value: 'search', label: __('Search Configuration', 'instantsearch-for-wp'), icon: 'search' },
 			{ value: 'provider', label: __('Provider Setup', 'instantsearch-for-wp'), icon: 'admin-settings' }
 		];
 	};
