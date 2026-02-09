@@ -43,13 +43,86 @@ class AlgoliaConnector extends AbstractConnector {
 		[ $app_id, $api_key ] = $this->get_credentials();
 
 		try {
-			$this->client = SearchClient::create( $app_id, $api_key );
 
 			// Trigger index settings update when indexes post type changes are saved.
 			add_action( 'save_post_' . Index::$cpt_slug, array( $this, 'update_index_settings' ), 10, 2 );
+
+			add_filter( 'instantsearch_for_wp_settings_schema', array( $this, 'filter_settings_schema' ) );
+			add_filter( 'instantsearch_for_wp_default_settings', array( $this, 'filter_default_settings' ) );
+
+			add_filter( 'instantsearch_for_wp_instantsearch_config', array( $this, 'filter_instantsearch_config' ) );
+			
+			$this->client = SearchClient::create( $app_id, $api_key );
 		} catch ( \Throwable $th ) {
 			//throw $th;
+			error_log( $th->getMessage() );
 		}
+	}
+
+	/**
+	 * Filter the default settings to set the provider to Algolia.
+	 *
+	 * @param array $default_settings The default settings array.
+	 * @return array The modified default settings array.
+	 */
+	public function filter_default_settings( $default_settings ) {
+		$default_settings['algolia'] = array(
+			'app_id'              => '',
+			'search_only_api_key' => '',
+			'admin_api_key'       => '',
+			'hide_algolia_badge'  => false,
+		);
+		return $default_settings;
+	}
+
+	/**
+	 * Filter the settings schema to include Algolia settings.
+	 *
+	 * @param array $schema The settings schema array.
+	 * @return array The modified settings schema array.
+	 */
+	public function filter_settings_schema( $schema ) {
+
+		if ( ! in_array( 'algolia', $schema['properties']['provider']['enum'], true ) ) {
+			$schema['properties']['provider']['enum'][] = 'algolia';
+		}
+
+		$schema['properties']['algolia'] = array(
+			'type'       => 'object',
+			'properties' => array(
+				'app_id'              => array(
+					'type' => 'string',
+				),
+				'search_only_api_key' => array(
+					'type' => 'string',
+				),
+				'admin_api_key'       => array(
+					'type' => 'string',
+				),
+				'hide_algolia_badge'  => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+		);
+		return $schema;
+	}
+
+	public function filter_instantsearch_config( $config ) {
+		$settings = Settings::get_settings();
+
+		if ( isset( $settings['algolia']['app_id'] ) && $settings['algolia']['app_id'] ) {
+			$config['appId'] = $settings['algolia']['app_id'];
+		}
+
+		if ( isset( $settings['algolia']['search_only_api_key'] ) && $settings['algolia']['search_only_api_key'] ) {
+			$config['apiKey'] = $settings['algolia']['search_only_api_key'];
+		}
+
+		if ( isset( $settings['algolia']['hide_algolia_badge'] ) && $settings['algolia']['hide_algolia_badge'] ) {
+			$config['hidePoweredBy'] = true;
+		}
+		return $config;
 	}
 
 	/**

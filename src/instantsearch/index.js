@@ -8,6 +8,7 @@ import {
 	dynamicWidgets,
 	infiniteHits,
 	panel,
+	poweredBy,
 	refinementList,
 	searchBox,
 	stats
@@ -89,6 +90,14 @@ search.addWidgets([
 		showLoadingIndicator: true
 	})
 ]);
+
+if ( ! instantSearchForWPFrontend?.hidePoweredBy ) {
+	search.addWidgets([
+		poweredBy({
+			container: '#isfwp-powered-by-algolia',
+		})
+	]);
+}
 
 // On search start, focus the search input.
 search.on('render', () => {
