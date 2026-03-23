@@ -1,8 +1,10 @@
 import './instantsearch.scss';
+
 import A11yDialog from 'a11y-dialog';
 import instantsearch from 'instantsearch.js';
 import { algoliasearch } from 'algoliasearch';
 import {
+	chat,
 	clearRefinements,
 	configure,
 	dynamicWidgets,
@@ -20,11 +22,46 @@ const container = document.getElementById('isfwp-site-search');
 const dialog = new A11yDialog(container);
 let isInitialized = false;
 
+const aiSummariesConfig = instantSearchForWPFrontend?.aiSummaries || {};
+const shouldLoadAiSummary =
+	instantSearchForWPFrontend?.provider === 'algolia'
+	&& !!aiSummariesConfig?.enabled;
+
+const noopSummaryController = {
+	isEnabled: false,
+	handleQueryChange() {},
+	reset() {},
+};
+
+let summaryController = noopSummaryController;
+
+if (shouldLoadAiSummary) {
+	import(
+		/* webpackChunkName: "ai-summary" */
+		'./ai-summary'
+	)
+		.then(({ createAiSummaryController }) => {
+			summaryController = createAiSummaryController({
+				container: document.getElementById('isfwp-site-search-summary'),
+				frontendConfig: instantSearchForWPFrontend,
+			});
+		})
+		.catch(() => {
+			summaryController = noopSummaryController;
+		});
+}
+
 // Initiate InstantSearch instance
 const search = instantsearch({
   indexName: instantSearchForWPFrontend.indexName,
   searchClient: algoliasearch(instantSearchForWPFrontend.appId, instantSearchForWPFrontend.apiKey),
+  future: {
+	preserveSharedStateOnUnmount: true,
+  },
+  attributesToSnippet: [`content:${instantSearchForWPFrontend?.sitesearchSettings?.snippet_length || 50}`],
 });
+
+let timerId;
 
 // Add widgets and start the search
 search.addWidgets([
@@ -38,7 +75,7 @@ search.addWidgets([
 		container: '#isfwp-site-search-hits',
 		templates: {
 			item(hit, { html, components }) {
-				return html`
+				var response = html`
 					<article class="hit-item postid-${hit.postID}" itemscope itemtype="https://schema.org/BlogPosting">
 						<h5 class="hit-heading" itemprop="headline">
 							<a href="${hit.url}" class="hit-title" itemprop="url">
@@ -50,6 +87,10 @@ search.addWidgets([
 						</p>
 					</article>
 				`;
+
+				response = wp.hooks.applyFilters('isfwp.searchHitItem', response, hit, components);
+
+				return response;
 			}
 		}
 	}),
@@ -84,10 +125,22 @@ search.addWidgets([
 	searchBox({
 		container: '#isfwp-site-search-input',
 		placeholder: instantSearchForWPFrontend?.sitesearchSettings?.placeholder_text || 'Search...',
-		searchAsYouType: false,
+		searchAsYouType: instantSearchForWPFrontend?.sitesearchSettings?.debounce_delay
+				&& instantSearchForWPFrontend.sitesearchSettings.debounce_delay > 0 ? true : false, // Disable search as you type if debounce is enabled, we'll handle it in queryHook.
 		showSubmit: true,
 		showReset: true,
-		showLoadingIndicator: true
+		showLoadingIndicator: true,
+		queryHook(query, refine) {
+			if (
+				instantSearchForWPFrontend?.sitesearchSettings?.debounce_delay
+				&& instantSearchForWPFrontend.sitesearchSettings.debounce_delay > 0
+			) {
+				clearTimeout(timerId);
+				timerId = setTimeout(() => refine(query), instantSearchForWPFrontend.sitesearchSettings.debounce_delay);
+			} else {
+				refine(query);
+			}
+		},
 	})
 ]);
 
@@ -105,7 +158,38 @@ search.on('render', () => {
 	if (searchInput) {
 		searchInput.focus();
 	}
+
+	if (summaryController.isEnabled && search?.helper?.state) {
+		const query = search.helper.state.query || '';
+		const hasHits = Number(search?.helper?.lastResults?.nbHits || 0) > 0;
+
+		if (hasHits) {
+			summaryController.handleQueryChange(query);
+		} else {
+			summaryController.reset();
+		}
+	}
 });
+
+if ( instantSearchForWPFrontend.conversationalSearch ) {
+	search.addWidgets([
+		chat({
+			container: '#algolia-chat',
+			agentId: instantSearchForWPFrontend.conversationalSearch,
+			templates: {
+				item(hit, { html, components }) {
+					return html`
+						<p><strong><a href="${hit.url}">${hit.title}</a></strong><br />${components.Snippet({ attribute: 'content', hit })}</p>
+					`;
+				},
+			},
+			getSearchPageURL: () => {
+				dialog.show();
+				return '#search';
+			},
+		})
+	]);
+}
 
 // Initialize search on dialog show
 dialog.on('show', async () => {
@@ -133,6 +217,8 @@ dialog.on('hide', () => {
 		// Clear query + all facet/numeric/tag refinements + page back to 0
 		search.helper.setQuery('').clearRefinements().setPage(0).search();
 	}
+
+	summaryController.reset();
 });
 
 // Bind close button
@@ -142,9 +228,6 @@ if (closeButton) {
 		dialog.hide();
 	});
 }
-
-// Open the dialog (for demonstration purposes, you might want to trigger this differently)
-// dialog.show();
 
 // Bind search trigger elements on click or focus
 document.querySelectorAll(instantSearchForWPFrontend.searchTriggerQuerySelectors).forEach((el) => {

@@ -86,7 +86,7 @@ class Settings {
 
 		$settings = wp_parse_args( $settings, $default_settings );
 
-		if ( null !== $key && is_string( $key ) && ! empty( $settings[ $key ] ) ) {
+		if ( null !== $key && is_string( $key ) && array_key_exists( $key, $settings ) ) {
 			return $settings[ $key ];
 		}
 
@@ -148,9 +148,11 @@ class Settings {
 			'provider'            => '',
 			'use_as_sitesearch'   => false,
 			'sitesearch_settings' => array(
-				'placeholder_text' => __( 'Search...', 'instantsearch-for-wp' ),
-				'sidebar_position' => 'left',
-				'snippet_length'   => 50,
+				'placeholder_text'      => __( 'Search...', 'instantsearch-for-wp' ),
+				'sidebar_position'      => 'left',
+				'snippet_length'        => 50,
+				'css_selector_triggers' => '',
+				'debounce_delay'        => 0,
 			),
 		);
 
@@ -194,6 +196,18 @@ class Settings {
 							'enum'    => array( 'left', 'right' ),
 							'default' => 'left',
 						),
+						'snippet_length' => array(
+							'type'    => 'integer',
+							'default' => 50,
+						),
+						'css_selector_triggers' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'debounce_delay' => array(
+							'type'    => 'integer',
+							'default' => 0,
+						),
 					),
 				),
 			),
@@ -207,10 +221,42 @@ class Settings {
 			array(
 				'type'         => 'object',
 				'default'      => $default,
+				'sanitize_callback' => array( $this, 'sanitize_settings' ),
 				'show_in_rest' => array(
 					'schema' => $schema,
 				),
 			)
 		);
+	}
+
+	/**
+	 * Sanitize plugin settings before saving.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value Raw settings from request.
+	 * @return array|\WP_Error
+	 */
+	public function sanitize_settings( $value ) {
+		$default  = self::get_default_settings();
+		$settings = wp_parse_args( is_array( $value ) ? $value : array(), $default );
+
+		if ( ! isset( $settings['algolia'] ) || ! is_array( $settings['algolia'] ) ) {
+			$settings['algolia'] = $default['algolia'];
+		} else {
+			$settings['algolia'] = wp_parse_args( $settings['algolia'], $default['algolia'] );
+		}
+
+		$settings['algolia']['ai_summaries_enabled'] = ! empty( $settings['algolia']['ai_summaries_enabled'] );
+		$settings['algolia']['ask_ai_agent_id']      = sanitize_text_field( (string) $settings['algolia']['ask_ai_agent_id'] );
+
+		if ( $settings['algolia']['ai_summaries_enabled'] && '' === $settings['algolia']['ask_ai_agent_id'] ) {
+			return new \WP_Error(
+				'instantsearch_for_wp_missing_ask_ai_agent_id',
+				__( 'Ask AI Agent ID is required when AI summaries are enabled.', 'instantsearch-for-wp' )
+			);
+		}
+
+		return $settings;
 	}
 }

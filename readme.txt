@@ -3,7 +3,7 @@ Contributors: konstantinbrazhnik
 Requires at least: 4.5
 Tested up to: 6.2.2
 Requires PHP: 8.0
-Stable tag: 1.13.0
+Stable tag: 1.0.1
 
 This plugin is a set of Gutenberg Blocks of InstantSearch.js widgets.
 
