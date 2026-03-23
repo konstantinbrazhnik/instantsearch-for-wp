@@ -122,12 +122,20 @@ class Index {
 	 * @return WP_Query The WP_Query object containing the posts.
 	 */
 	public function get_posts_query( $number = 100, $offset = 0 ) {
+		$post_types  = $this->index_settings['post_types'] ?? array( 'post' );
+		$post_types  = is_array( $post_types ) ? $post_types : array( $post_types );
+		$post_status = array( 'publish' );
+
+		if ( in_array( 'attachment', $post_types, true ) ) {
+			$post_status[] = 'inherit';
+		}
+
 		$query = new WP_Query(
 			array(
-				'post_type'      => $this->index_settings['post_types'] ?? 'post',
+				'post_type'      => $post_types,
 				'posts_per_page' => $number,
 				'offset'         => $offset,
-				'post_status'    => 'publish',
+				'post_status'    => array_values( array_unique( $post_status ) ),
 				'fields'         => 'ids',
 			)
 		);

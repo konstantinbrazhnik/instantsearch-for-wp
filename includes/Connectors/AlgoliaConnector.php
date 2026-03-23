@@ -13,6 +13,7 @@ namespace InstantSearchForWP\Connectors;
 
 use InstantSearchForWP\Settings;
 use InstantSearchForWP\Index;
+use InstantSearchForWP\PDFTextExtractor;
 use Algolia\AlgoliaSearch\Api\SearchClient;
 
 /**
@@ -104,6 +105,12 @@ class AlgoliaConnector extends AbstractConnector {
 					if ( ! $post ) {
 						return false;
 					}
+
+					if ( 'attachment' === $post->post_type ) {
+						return 'application/pdf' === get_post_mime_type( $post_id )
+							&& in_array( 'attachment', $index->index_settings['post_types'], true );
+					}
+
 					return in_array( $post->post_type, $index->index_settings['post_types'], true );
 				}
 			);
@@ -119,7 +126,7 @@ class AlgoliaConnector extends AbstractConnector {
 			$record = $this->format_post( $post_id, $index );
 
 			if ( $record ) {
-				$content_chunks = $this->chunk_text_by_sentences( $record['content'] ?? '', 250, true );
+				$content_chunks = $this->chunk_text_by_sentences( $record['content'] ?? '', 500, true );
 				if ( count( $content_chunks ) > 1 ) {
 					foreach ( $content_chunks as $idx => $chunk ) {
 						$chunked_record            = $record;
@@ -175,6 +182,11 @@ class AlgoliaConnector extends AbstractConnector {
 			'url'            => get_permalink( $post->ID ),
 		);
 
+		if ( 'attachment' === $post->post_type && 'application/pdf' === get_post_mime_type( $post->ID ) ) {
+			$record['content'] = PDFTextExtractor::get_instance()->get_attachment_text( $post->ID );
+			$record['mime_type'] = 'application/pdf';
+		}
+
 		if ( $post->post_author ) {
 			$record['author'] = get_the_author_meta( 'display_name', $post->post_author );
 		}
@@ -201,6 +213,8 @@ class AlgoliaConnector extends AbstractConnector {
 				}
 			}
 		}
+
+		$record = apply_filters( 'instantsearch_algolia_record', $record, $post, $index );
 
 		return $record;
 	}
@@ -295,10 +309,28 @@ class AlgoliaConnector extends AbstractConnector {
 		}
 
 		$index_settings = array(
-			'searchableAttributes'  => array_merge( $searchable_attributes, $facet_attributes ),
-			'attributesForFaceting' => $attributes_for_faceting,
-			'distinct'              => 1,
-			'attributeForDistinct'  => 'postID',
+			'searchableAttributes'   => array_merge( $searchable_attributes, $facet_attributes ),
+			'attributesForFaceting'  => $attributes_for_faceting,
+			'distinct'               => 1,
+			'attributeForDistinct'   => 'postID',
+			// Set searchable attributes as highligthtedAttributes to ensure they are highlighted in results.
+			'attributesToHighlight'  => $searchable_attributes,
+			'attributesToSnippet'    => apply_filters( 'instantsearch_attributes_to_snippet', array( 'content' ), $index['name'] ?? 'search' ),
+			'removeWordsIfNoResults' => apply_filters( 'instantsearch_remove_words_if_no_results', 'allOptional', $index['name'] ?? 'search' ),
+			'ranking'                => apply_filters(
+				'instantsearch_ranking',
+				array(
+					'typo',
+					'geo',
+					'words',
+					'filters',
+					'attribute',
+					'proximity',
+					'exact',
+					'desc(date_ts)'
+				),
+				$index['name'] ?? 'search'
+			),
 		);
 
 		$index_settings = apply_filters( 'instantsearch_index_settings', $index_settings, $index['name'] ?? 'search' );

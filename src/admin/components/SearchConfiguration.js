@@ -1,5 +1,5 @@
 import { Button, __experimentalNumberControl as NumberControl, SelectControl, TextControl, ToggleControl } from "@wordpress/components";
-import { useState } from "@wordpress/element";
+import { useEffect, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { useAdminContext } from "./AdminContext";
 
@@ -10,13 +10,23 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 		loading,
 		saveSettings,
 		setLoading,
-		settings
+		settings,
+		provider,
+		algoliaConfig,
+		setAlgoliaConfig
 	} = useAdminContext();
 	
 	const [useSearchSettings, setUseSearchSettings] = useState({
 		use_as_sitesearch: settings?.use_as_sitesearch || false,
 		sitesearch_settings: settings?.sitesearch_settings || {}
 	});
+
+	useEffect(() => {
+		setUseSearchSettings({
+			use_as_sitesearch: settings?.use_as_sitesearch || false,
+			sitesearch_settings: settings?.sitesearch_settings || {}
+		});
+	}, [settings?.use_as_sitesearch, settings?.sitesearch_settings]);
 	
 	const saveSearchSettings = async () => {
 		setLoading(true);
@@ -26,6 +36,25 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 	return (
 		<>
 			<h3>{__('Search Configuration', 'instantsearch-for-wp')}</h3>
+			{ provider === 'algolia' && (
+				<>
+					<h4>{__('AI Summaries', 'instantsearch-for-wp')}</h4>
+					<ToggleControl
+						label={__('Enable AI summaries', 'instantsearch-for-wp')}
+						help={__('Use Algolia Ask AI to show a summary above the hits list.', 'instantsearch-for-wp')}
+						checked={!!algoliaConfig?.ai_summaries_enabled}
+						onChange={(value) => setAlgoliaConfig({ ...algoliaConfig, ai_summaries_enabled: value })}
+					/>
+					{ !!algoliaConfig?.ai_summaries_enabled && (
+						<TextControl
+							label={__('Ask AI Agent ID', 'instantsearch-for-wp')}
+							help={__('Required when AI summaries are enabled.', 'instantsearch-for-wp')}
+							value={algoliaConfig?.ask_ai_agent_id || ''}
+							onChange={(value) => setAlgoliaConfig({ ...algoliaConfig, ask_ai_agent_id: value })}
+						/>
+					)}
+				</>
+			)}
 			<ToggleControl
 				label={__('Enable this index and Instant Search for WP site search.', 'instantsearch-for-wp')}
 				checked={useSearchSettings?.use_as_sitesearch === indexCpt?.slug}
@@ -86,6 +115,30 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 									sidebar_position: value,
 								}
 							}))}
+						/>
+						<TextControl
+							label={__('CSS Selector Triggers', 'instantsearch-for-wp')}
+							value={useSearchSettings?.sitesearch_settings?.css_selector_triggers || ''}
+							onChange={(value) => setUseSearchSettings((prev) => ({
+								...prev,
+								sitesearch_settings: {
+									...prev.sitesearch_settings,
+									css_selector_triggers: value,
+								}
+							}))}
+							help={__('Enter CSS selectors for elements that should trigger the site search when clicked. Separate multiple selectors with commas.', 'instantsearch-for-wp')}
+						/>
+						<NumberControl
+							label={__('Debounce Delay (in milliseconds)', 'instantsearch-for-wp')}
+							value={useSearchSettings?.sitesearch_settings?.debounce_delay || 0}
+							onChange={(value) => setUseSearchSettings((prev) => ({
+								...prev,
+								sitesearch_settings: {
+									...prev.sitesearch_settings,
+									debounce_delay: parseInt(value, 10),
+								}
+							}))}
+							help={__('Set a debounce delay for search input to improve performance. Enter the delay in milliseconds. Set to 0 to disable and only trigger search on enter key press.', 'instantsearch-for-wp')}
 						/>
 
 						{/* TODO: Add hits template field. */}

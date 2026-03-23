@@ -7,7 +7,7 @@
  * Author URI:        https://www.yokoco.com
  * Text Domain:       instantsearch-for-wp
  * Domain Path:       /languages
- * Version:           1.0.0
+ * Version:           1.0.1
  * GitHub Plugin URI: https://github.com/Yoko-Co/instantsearch-for-wp
  * Release Asset:     true
  * Primary Branch:    main
@@ -19,7 +19,7 @@ namespace InstantSearchForWP;
 
 define( 'INSTANTSEARCH_FOR_WP_PATH', __DIR__ );
 define( 'INSTANTSEARCH_FOR_WP_FILE', __FILE__ );
-define( 'INSTANTSEARCH_FOR_WP_VERSION', '1.0.0' );
+define( 'INSTANTSEARCH_FOR_WP_VERSION', '1.0.1' );
 define( 'INSTANTSEARCH_FOR_WP_URL', plugin_dir_url( __FILE__ ) );
 
 if ( is_dir( plugin_dir_path( __FILE__ ) . '/vendor' ) ) {
@@ -125,12 +125,6 @@ if ( function_exists( '\InstantSearchForWP\instantsearchforwp_fs' ) ) {
 		 * Init all the things.
 		 */
 		public function init() {
-			load_plugin_textdomain(
-				'instantsearch-for-wp',
-				false,
-				basename( __DIR__ ) . '/languages'
-			);
-
 			$activated_plugin_setting = 'instantsearch_for_wp_version';
 			$activated_plugin_version = get_option( $activated_plugin_setting, '1.0.0' );
 			if ( version_compare( $activated_plugin_version, INSTANTSEARCH_FOR_WP_VERSION, '<' ) ) {
@@ -143,6 +137,21 @@ if ( function_exists( '\InstantSearchForWP\instantsearchforwp_fs' ) ) {
 			// Run plugin init code here.
 			do_action( 'instantsearch_for_wp_plugin_init' );
 		}
+
+		 /**
+		  * Load plugin textdomain for translations.
+		  *
+		  * @since 1.0.0
+		  *
+		  * @return void
+		  */
+		public function load_textdomain() {
+			load_plugin_textdomain(
+				'instantsearch-for-wp',
+				false,
+				basename( __DIR__ ) . '/languages'
+			);
+		}
 	}
 
 	add_action(
@@ -150,6 +159,14 @@ if ( function_exists( '\InstantSearchForWP\instantsearchforwp_fs' ) ) {
 		function () {
 			$instantsearch_for_wp = InstantSearchForWP::get_instance();
 			$instantsearch_for_wp->init();
+		}
+	);
+
+	add_action(
+		'init',
+		function () {
+			$instantsearch_for_wp = InstantSearchForWP::get_instance();
+			$instantsearch_for_wp->load_textdomain();
 		}
 	);
 }

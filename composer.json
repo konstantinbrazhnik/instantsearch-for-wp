@@ -6,7 +6,8 @@
         "typesense/typesense-php": "^5.1",
         "algolia/algoliasearch-client-php": "^4.0",
         "symfony/http-client": "^6.4",
-        "freemius/wordpress-sdk": "^2.13"
+        "freemius/wordpress-sdk": "^2.13",
+        "smalot/pdfparser": "^2.12"
     },
     "autoload": {
         "psr-4": {

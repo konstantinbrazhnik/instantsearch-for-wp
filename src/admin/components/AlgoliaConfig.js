@@ -1,5 +1,5 @@
 import { __ } from "@wordpress/i18n";
-import { TextControl } from "@wordpress/components";
+import { TextControl, ToggleControl } from "@wordpress/components";
 
 import { useAdminContext } from "./AdminContext";
 
@@ -32,6 +32,22 @@ const AlgoliaConfig = () => {
 			onChange={ ( value ) => setAlgoliaConfig( { ...algoliaConfig, admin_api_key: value } ) }
 			value={algoliaConfig?.admin_api_key || '' }
 		/>
+		<ToggleControl
+			__nextHasNoMarginBottom
+			label={ __('Enable AI summaries', 'instantsearch-for-wp') }
+			help={ __('When enabled, Ask AI summaries can be shown above search results.', 'instantsearch-for-wp') }
+			checked={ !! algoliaConfig?.ai_summaries_enabled }
+			onChange={ ( value ) => setAlgoliaConfig( { ...algoliaConfig, ai_summaries_enabled: value } ) }
+		/>
+		{ !! algoliaConfig?.ai_summaries_enabled && (
+			<TextControl
+				__next40pxDefaultSize
+				label={ __('Ask AI Agent ID', 'instantsearch-for-wp') }
+				help={ __('Required when AI summaries are enabled.', 'instantsearch-for-wp') }
+				onChange={ ( value ) => setAlgoliaConfig( { ...algoliaConfig, ask_ai_agent_id: value } ) }
+				value={algoliaConfig?.ask_ai_agent_id || '' }
+			/>
+		) }
 	</div>;
 }
 export default AlgoliaConfig;

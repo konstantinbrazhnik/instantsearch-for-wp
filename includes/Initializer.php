@@ -32,6 +32,8 @@ class Initializer {
 		Index::init();
 		Indexer::get_instance();
 		new IndexingCriteria();
+		PDFTextExtractor::get_instance();
+		Cli\InstantSearchCommand::register();
 
 		new Settings();
 		// Initialize admin interface.
@@ -39,6 +41,7 @@ class Initializer {
 			new Admin();
 		} else {
 			new SiteSearch();
+			new Integrations();
 		}
 
 		if ( defined( 'REST_API_VERSION' ) ) {
