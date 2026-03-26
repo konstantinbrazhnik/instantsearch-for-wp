@@ -125,10 +125,16 @@ if ( function_exists( '\InstantSearchForWP\instantsearchforwp_fs' ) ) {
 		 * Init all the things.
 		 */
 		public function init() {
-			load_plugin_textdomain(
-				'instantsearch-for-wp',
-				false,
-				basename( __DIR__ ) . '/languages'
+			add_action(
+				'init',
+				function () {
+					load_plugin_textdomain(
+						'instantsearch-for-wp',
+						false,
+						basename( __DIR__ ) . '/languages'
+					);
+				},
+				1
 			);
 
 			$activated_plugin_setting = 'instantsearch_for_wp_version';
