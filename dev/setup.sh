@@ -10,8 +10,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-DC="docker-compose -f $REPO_ROOT/dev/docker-compose.yml"
-WP="$DC run --rm wpcli"
+# Prefer docker compose v2 plugin over legacy docker-compose v1 binary
+# Use arrays to handle paths with spaces (e.g. "Yoko Co")
+if docker compose version &>/dev/null 2>&1; then
+  DC=(docker compose -f "$REPO_ROOT/dev/docker-compose.yml")
+else
+  DC=(docker-compose -f "$REPO_ROOT/dev/docker-compose.yml")
+fi
+WP=("${DC[@]}" run --rm wpcli)
 
 # Load .env if present
 if [ -f "$REPO_ROOT/.env" ]; then
@@ -38,7 +44,7 @@ warn()    { echo -e "${YELLOW}[setup]${NC} $*"; }
 wait_for_wordpress() {
   info "Waiting for WordPress container to be ready..."
   local retries=30
-  until $DC exec -T wordpress curl -sf http://localhost/wp-login.php > /dev/null 2>&1; do
+  until "${DC[@]}" exec -T wordpress curl -sf http://localhost/wp-login.php > /dev/null 2>&1; do
     retries=$((retries - 1))
     if [ "$retries" -le 0 ]; then
       echo "ERROR: WordPress container did not become ready in time." >&2
@@ -53,13 +59,13 @@ wait_for_wordpress() {
 # 2. Install WordPress core
 # =============================================================================
 install_wordpress() {
-  if $WP core is-installed 2>/dev/null; then
+  if "${WP[@]}" core is-installed 2>/dev/null; then
     info "WordPress is already installed — skipping core install."
     return 0
   fi
 
   info "Installing WordPress core..."
-  $WP core install \
+  "${WP[@]}" core install \
     --url="$WP_SITE_URL" \
     --title="$WP_SITE_TITLE" \
     --admin_user="$WP_ADMIN_USER" \
@@ -70,11 +76,11 @@ install_wordpress() {
   success "WordPress installed."
 
   # General settings
-  $WP option update blogdescription "Powered by InstantSearch for WP"
-  $WP option update timezone_string "America/New_York"
-  $WP option update date_format "F j, Y"
-  $WP option update permalink_structure "/%postname%/"
-  $WP rewrite flush
+  "${WP[@]}" option update blogdescription "Powered by InstantSearch for WP"
+  "${WP[@]}" option update timezone_string "America/New_York"
+  "${WP[@]}" option update date_format "F j, Y"
+  "${WP[@]}" option update permalink_structure "/%postname%/"
+  "${WP[@]}" rewrite flush
 }
 
 # =============================================================================
@@ -82,7 +88,7 @@ install_wordpress() {
 # =============================================================================
 activate_plugin() {
   info "Activating instantsearch-for-wp plugin..."
-  $WP plugin activate instantsearch-for-wp 2>/dev/null || warn "Plugin activation returned non-zero (may already be active)"
+  "${WP[@]}" plugin activate instantsearch-for-wp 2>/dev/null || warn "Plugin activation returned non-zero (may already be active)"
   success "Plugin activated."
 }
 
@@ -90,13 +96,13 @@ activate_plugin() {
 # 4. Install & activate a lightweight theme
 # =============================================================================
 install_theme() {
-  if $WP theme is-installed twentytwentythree 2>/dev/null; then
+  if "${WP[@]}" theme is-installed twentytwentythree 2>/dev/null; then
     info "Theme twentytwentythree already installed."
   else
     info "Installing Twenty Twenty-Three theme..."
-    $WP theme install twentytwentythree
+    "${WP[@]}" theme install twentytwentythree
   fi
-  $WP theme activate twentytwentythree
+  "${WP[@]}" theme activate twentytwentythree
   success "Theme activated: twentytwentythree"
 }
 
@@ -106,7 +112,7 @@ install_theme() {
 import_demo_content() {
   # Check if demo content already exists
   local post_count
-  post_count=$($WP post list --post_status=publish --format=count 2>/dev/null || echo "0")
+  post_count=$("${WP[@]}" post list --post_status=publish --format=count 2>/dev/null || echo "0")
   if [ "$post_count" -gt 5 ]; then
     info "Demo content already present ($post_count posts) — skipping import."
     return 0
@@ -115,26 +121,26 @@ import_demo_content() {
   info "Importing demo content..."
 
   # ── Categories ─────────────────────────────────────────────
-  $WP term create category "Search & Discovery"   --slug=search-discovery   --description="Articles about search technology and UX"
-  $WP term create category "WordPress Development" --slug=wordpress-dev      --description="WordPress tips and best practices"
-  $WP term create category "Tutorials"             --slug=tutorials          --description="Step-by-step guides and how-tos"
-  $WP term create category "Product Updates"       --slug=product-updates    --description="Plugin news and release notes"
-  $WP term create category "Performance"           --slug=performance        --description="Speed and optimization topics"
+  "${WP[@]}" term create category "Search & Discovery"   --slug=search-discovery   --description="Articles about search technology and UX"
+  "${WP[@]}" term create category "WordPress Development" --slug=wordpress-dev      --description="WordPress tips and best practices"
+  "${WP[@]}" term create category "Tutorials"             --slug=tutorials          --description="Step-by-step guides and how-tos"
+  "${WP[@]}" term create category "Product Updates"       --slug=product-updates    --description="Plugin news and release notes"
+  "${WP[@]}" term create category "Performance"           --slug=performance        --description="Speed and optimization topics"
 
   # ── Tags ───────────────────────────────────────────────────
   for tag in algolia typesense instantsearch gutenberg search-ux facets relevance indexing woocommerce php javascript react; do
-    $WP term create post_tag "$tag" --slug="$tag" 2>/dev/null || true
+    "${WP[@]}" term create post_tag "$tag" --slug="$tag" 2>/dev/null || true
   done
 
   # ── Pages ──────────────────────────────────────────────────
-  $WP post create \
+  "${WP[@]}" post create \
     --post_type=page \
     --post_title="Search" \
     --post_name=search \
     --post_status=publish \
     --post_content="<!-- wp:paragraph --><p>Use the search bar below to explore all content on this site. Results update in real-time as you type.</p><!-- /wp:paragraph -->"
 
-  $WP post create \
+  "${WP[@]}" post create \
     --post_type=page \
     --post_title="About" \
     --post_name=about \
@@ -143,25 +149,25 @@ import_demo_content() {
 
   # Set static front page
   local about_id
-  about_id=$($WP post list --post_type=page --post_status=publish --name=about --field=ID --format=ids 2>/dev/null | head -1)
-  $WP option update page_on_front "$about_id" 2>/dev/null || true
-  $WP option update show_on_front page 2>/dev/null || true
+  about_id=$("${WP[@]}" post list --post_type=page --post_status=publish --name=about --field=ID --format=ids 2>/dev/null | head -1)
+  "${WP[@]}" option update page_on_front "$about_id" 2>/dev/null || true
+  "${WP[@]}" option update show_on_front page 2>/dev/null || true
 
   # ── Blog posts ─────────────────────────────────────────────
   # Helper: create a post and assign category + tags
   create_post() {
     local title="$1" slug="$2" category="$3" tags="$4" content="$5"
     local post_id
-    post_id=$($WP post create \
+    post_id=$("${WP[@]}" post create \
       --post_title="$title" \
       --post_name="$slug" \
       --post_status=publish \
       --post_content="$content" \
       --porcelain 2>/dev/null)
-    $WP post term set "$post_id" category "$category" 2>/dev/null || true
+    "${WP[@]}" post term set "$post_id" category "$category" 2>/dev/null || true
     IFS=',' read -ra tag_arr <<< "$tags"
     for t in "${tag_arr[@]}"; do
-      $WP post term add "$post_id" post_tag "$(echo "$t" | xargs)" 2>/dev/null || true
+      "${WP[@]}" post term add "$post_id" post_tag "$(echo "$t" | xargs)" 2>/dev/null || true
     done
   }
 
@@ -273,17 +279,17 @@ import_demo_content() {
   # ── Static front page: set home to About page ──────────────
   # (already done above, just confirm blog page)
   local blog_post_id
-  blog_post_id=$($WP post create \
+  blog_post_id=$("${WP[@]}" post create \
     --post_type=page \
     --post_title="Blog" \
     --post_name=blog \
     --post_status=publish \
     --post_content="<!-- wp:paragraph --><p>Latest articles.</p><!-- /wp:paragraph -->" \
     --porcelain 2>/dev/null)
-  $WP option update page_for_posts "$blog_post_id" 2>/dev/null || true
+  "${WP[@]}" option update page_for_posts "$blog_post_id" 2>/dev/null || true
 
   success "Demo content imported ($(
-    $WP post list --post_status=publish --format=count 2>/dev/null
+    "${WP[@]}" post list --post_status=publish --format=count 2>/dev/null
   ) posts total)."
 }
 
@@ -294,13 +300,13 @@ configure_plugin() {
   info "Configuring plugin settings (provider: $SEARCH_PROVIDER)..."
 
   if [ "$SEARCH_PROVIDER" = "algolia" ] && [ -n "${ALGOLIA_APP_ID:-}" ]; then
-    $WP option update instantsearch_for_wp_settings \
+    "${WP[@]}" option update instantsearch_for_wp_settings \
       "{\"provider\":\"algolia\",\"algolia\":{\"app_id\":\"${ALGOLIA_APP_ID}\",\"search_only_api_key\":\"${ALGOLIA_SEARCH_ONLY_API_KEY:-}\",\"admin_api_key\":\"${ALGOLIA_ADMIN_API_KEY:-}\"},\"use_as_sitesearch\":true,\"sitesearch_settings\":{\"placeholder_text\":\"Search posts, pages, and more...\",\"sidebar_position\":\"left\",\"snippet_length\":120}}" \
       --format=json
     success "Plugin configured with Algolia provider."
   else
     # Default: Typesense (local Docker service)
-    $WP option update instantsearch_for_wp_settings \
+    "${WP[@]}" option update instantsearch_for_wp_settings \
       "{\"provider\":\"typesense\",\"algolia\":{\"app_id\":\"\",\"search_only_api_key\":\"\",\"admin_api_key\":\"\"},\"use_as_sitesearch\":true,\"sitesearch_settings\":{\"placeholder_text\":\"Search posts, pages, and more...\",\"sidebar_position\":\"left\",\"snippet_length\":120}}" \
       --format=json
     success "Plugin configured with Typesense provider (local Docker)."
@@ -308,10 +314,10 @@ configure_plugin() {
 
   # Create a search index post (CPT: isfwp_index) if none exists
   local index_count
-  index_count=$($WP post list --post_type=isfwp_index --format=count 2>/dev/null || echo "0")
+  index_count=$("${WP[@]}" post list --post_type=isfwp_index --format=count 2>/dev/null || echo "0")
   if [ "$index_count" -eq 0 ]; then
     info "Creating default search index..."
-    $WP post create \
+    "${WP[@]}" post create \
       --post_type=isfwp_index \
       --post_title="Main Search Index" \
       --post_name=main-search \

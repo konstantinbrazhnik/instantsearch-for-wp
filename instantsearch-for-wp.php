@@ -125,6 +125,18 @@ if ( function_exists( '\InstantSearchForWP\instantsearchforwp_fs' ) ) {
 		 * Init all the things.
 		 */
 		public function init() {
+			add_action(
+				'init',
+				function () {
+					load_plugin_textdomain(
+						'instantsearch-for-wp',
+						false,
+						basename( __DIR__ ) . '/languages'
+					);
+				},
+				1
+			);
+
 			$activated_plugin_setting = 'instantsearch_for_wp_version';
 			$activated_plugin_version = get_option( $activated_plugin_setting, '1.0.0' );
 			if ( version_compare( $activated_plugin_version, INSTANTSEARCH_FOR_WP_VERSION, '<' ) ) {
