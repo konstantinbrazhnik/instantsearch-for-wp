@@ -13,6 +13,9 @@ class SiteSearch {
 		// Add the root DOM <div> for InstantSearch.js.
 		add_action( 'wp_footer', array( $this, 'add_instantsearch_root_div' ) );
 
+		// Add the floating search trigger button.
+		add_action( 'wp_footer', array( $this, 'add_search_trigger_button' ) );
+
 		// Enqueue frontend scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
@@ -121,6 +124,22 @@ class SiteSearch {
 	}
 
 	/**
+	 * Add a floating search trigger button to the page.
+	 *
+	 * @return void
+	 */
+	public function add_search_trigger_button() {
+		?>
+		<button class="isfwp-search-trigger isfwp-floating-trigger" aria-label="<?php esc_attr_e( 'Open search', 'instantsearch-for-wp' ); ?>">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<circle cx="11" cy="11" r="8"></circle>
+				<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+			</svg>
+		</button>
+		<?php
+	}
+
+	/**
 	 * Get InstantSearch configuration for frontend.
 	 *
 	 * @return array Configuration array for InstantSearch.js
@@ -146,13 +165,7 @@ class SiteSearch {
 					),
 					$taxonomy_titles
 				),
-				'searchTriggerQuerySelectors' => implode(
-					',',
-					apply_filters(
-						'instantsearch_for_wp_search_trigger_query_selectors',
-						array()
-					)
-				),
+				'searchTriggerQuerySelectors' => $settings['sitesearch_settings']['css_selector_triggers'] ?? '.isfwp-search-trigger,.menu-item .fl-search-form .fl-button-wrap > a,.swp-input--search',
 				'sitesearchSettings'          => $settings['sitesearch_settings'] ?? array(),
 				'conversationalSearch'        => $this->is_conversational_search_enabled()
 					? apply_filters( 'instantsearch_for_wp_conversational_search_agent_id', null )

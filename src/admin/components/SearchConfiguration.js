@@ -155,7 +155,20 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 							help={__('Set a debounce delay for search input to improve performance. Enter the delay in milliseconds. Set to 0 to disable and only trigger search on enter key press.', 'instantsearch-for-wp')}
 						/>
 
-						{/* TODO: Add hits template field. */}
+						<TextControl
+						label={__('Search Trigger CSS Selectors', 'instantsearch-for-wp')}
+						help={__('Comma-separated CSS selectors for elements that open the search dialog when clicked. The .isfwp-search-trigger class is automatically added to the built-in floating button.', 'instantsearch-for-wp')}
+						value={useSearchSettings?.sitesearch_settings?.trigger_selectors ?? '.isfwp-search-trigger,.menu-item .fl-search-form .fl-button-wrap > a,.swp-input--search'}
+						onChange={(value) => setUseSearchSettings((prev) => ({
+							...prev,
+							sitesearch_settings: {
+								...prev.sitesearch_settings,
+								trigger_selectors: value,
+							}
+						}))}
+					/>
+
+					{/* TODO: Add hits template field. */}
 
 						{/* TODO: Finish Facet Overrides */}
 						{/* <FacetOverrides index={index} /> */}
