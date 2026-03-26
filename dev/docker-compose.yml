@@ -1,0 +1,117 @@
+version: '3.8'
+
+# ============================================================
+# InstantSearch for WP — Local Dev Environment
+# ============================================================
+# Usage:  ./dev.sh up
+# Direct: docker-compose -f dev/docker-compose.yml up -d
+# ============================================================
+
+services:
+
+  # ── MySQL ─────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE:      ${MYSQL_DATABASE:-wordpress}
+      MYSQL_USER:          ${MYSQL_USER:-wordpress}
+      MYSQL_PASSWORD:      ${MYSQL_PASSWORD:-wordpress}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ── Typesense (local search backend) ──────────────────────
+  typesense:
+    image: typesense/typesense:28.0.0
+    restart: unless-stopped
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY:  ${TYPESENSE_API_KEY:-dev-typesense-api-key}
+      TYPESENSE_ENABLE_CORS: "true"
+    volumes:
+      - typesense_data:/data
+    ports:
+      - "${TYPESENSE_PORT:-8108}:8108"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8108/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── WordPress ─────────────────────────────────────────────
+  wordpress:
+    image: wordpress:php8.2-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST:     db
+      WORDPRESS_DB_USER:     ${MYSQL_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME:     ${MYSQL_DATABASE:-wordpress}
+      # Extra PHP constants injected into wp-config.php
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_DEBUG', true );
+        define( 'WP_DEBUG_LOG', true );
+        define( 'SCRIPT_DEBUG', true );
+        define( 'WP_HOME',    '${WP_SITE_URL:-http://instantsearch-dev.local:8080}' );
+        define( 'WP_SITEURL', '${WP_SITE_URL:-http://instantsearch-dev.local:8080}' );
+        /* Search provider */
+        define( 'INSTANTSEARCH_FOR_WP_PROVIDER', '${SEARCH_PROVIDER:-typesense}' );
+        /* Algolia (if using Algolia provider) */
+        define( 'ALGOLIA_APP_ID',              '${ALGOLIA_APP_ID:-}' );
+        define( 'ALGOLIA_API_KEY',             '${ALGOLIA_SEARCH_ONLY_API_KEY:-}' );
+        define( 'ALGOLIA_ADMIN_API_KEY',       '${ALGOLIA_ADMIN_API_KEY:-}' );
+        /* Typesense (local Docker service) */
+        define( 'TYPESENSE_HOST',     'typesense' );
+        define( 'TYPESENSE_PORT',     '8108' );
+        define( 'TYPESENSE_PROTOCOL', 'http' );
+        define( 'TYPESENSE_API_KEY',  '${TYPESENSE_API_KEY:-dev-typesense-api-key}' );
+    volumes:
+      # Mount the plugin repo into WordPress plugins directory
+      - ..:/var/www/html/wp-content/plugins/instantsearch-for-wp:cached
+      # Persist WordPress core files and uploads
+      - wp_core:/var/www/html
+      - wp_uploads:/var/www/html/wp-content/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/wp-login.php"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ── WP-CLI (used by dev.sh for setup scripts) ─────────────
+  wpcli:
+    image: wordpress:cli-php8.2
+    restart: "no"
+    depends_on:
+      - wordpress
+    volumes:
+      - ..:/var/www/html/wp-content/plugins/instantsearch-for-wp:cached
+      - wp_core:/var/www/html
+      - wp_uploads:/var/www/html/wp-content/uploads
+    environment:
+      WORDPRESS_DB_HOST:     db
+      WORDPRESS_DB_USER:     ${MYSQL_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME:     ${MYSQL_DATABASE:-wordpress}
+      WP_CLI_ALLOW_ROOT:     "1"
+    user: "33:33"
+    entrypoint: ["wp", "--path=/var/www/html", "--allow-root"]
+
+volumes:
+  mysql_data:
+  typesense_data:
+  wp_core:
+  wp_uploads:
