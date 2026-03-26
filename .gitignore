@@ -45,3 +45,22 @@ build/*
 typesense-server*
 typesense-data
 typesense-dashboard
+
+# Dev environment data directories
+dev/mysql-data/
+dev/typesense-data/
+dev/wp-uploads/
+
+# Playwright output
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/e2e/.playwright/
+
+# Generated media (keep .gitkeep)
+docs/media/*.png
+docs/media/*.jpg
+docs/media/*.gif
+docs/media/*.mp4
+docs/media/*.webm
+!docs/media/.gitkeep
