@@ -153,9 +153,10 @@ class Settings {
 			),
 			'use_as_sitesearch'   => false,
 			'sitesearch_settings' => array(
-				'placeholder_text' => __( 'Search...', 'instantsearch-for-wp' ),
-				'sidebar_position' => 'left',
-				'snippet_length'   => 50,
+				'placeholder_text'  => __( 'Search...', 'instantsearch-for-wp' ),
+				'sidebar_position'  => 'left',
+				'snippet_length'    => 50,
+				'trigger_selectors' => '.isfwp-search-trigger,.menu-item .fl-search-form .fl-button-wrap > a,.swp-input--search',
 			),
 		);
 	}
@@ -210,6 +211,10 @@ class Settings {
 							'type'    => 'string',
 							'enum'    => array( 'left', 'right' ),
 							'default' => 'left',
+						),
+						'trigger_selectors' => array(
+							'type'    => 'string',
+							'default' => '.isfwp-search-trigger,.menu-item .fl-search-form .fl-button-wrap > a,.swp-input--search',
 						),
 					),
 				),

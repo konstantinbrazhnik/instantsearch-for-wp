@@ -195,3 +195,33 @@ input.ais-RefinementList-checkbox {
 .ais-InfiniteHits-loadMore {
 	margin-top: var(--isfwp-gap-spacing);
 }
+
+/* Floating search trigger button */
+.isfwp-floating-trigger {
+	position: fixed;
+	bottom: 2rem;
+	right: 2rem;
+	z-index: 99999;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background-color: #1e1e1e;
+	color: #fff;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	transition: background-color 0.2s ease, transform 0.15s ease;
+
+	&:hover {
+		background-color: #333;
+		transform: scale(1.08);
+	}
+
+	&:focus-visible {
+		outline: 3px solid #0073aa;
+		outline-offset: 2px;
+	}
+}
