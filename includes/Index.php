@@ -116,6 +116,10 @@ class Index {
 	/**
 	 * Retrieve posts for indexing based on index settings.
 	 *
+	 * Posts excluded from this index via the `_instantsearch_exclude` post meta
+	 * (containing this index's slug or the `__all__` sentinel) are automatically
+	 * omitted from the query results.
+	 *
 	 * @param int $number Number of posts to retrieve.
 	 * @param int $offset Offset for pagination.
 	 * 
@@ -130,6 +134,54 @@ class Index {
 			$post_status[] = 'inherit';
 		}
 
+		$index_slug = isset( $this->index_post ) ? $this->index_post->post_name : '';
+
+		// Build a meta_query to exclude posts that are excluded from all indices
+		// or from this specific index. WordPress serializes array meta values, so
+		// a LIKE search on the serialized string is used to find the sentinel or
+		// the index slug.
+		//
+		// We include a post when EITHER:
+		//   (a) the _instantsearch_exclude key does not exist in the DB, OR
+		//   (b) the stored value does NOT contain '"__all__"' AND does NOT contain
+		//       '"<index_slug>"' (i.e. the serialised PHP does not include those strings).
+		$meta_query = array(
+			'relation' => 'OR',
+			// (a) No exclusion meta set.
+			array(
+				'key'     => PostExclusion::META_KEY,
+				'compare' => 'NOT EXISTS',
+			),
+		);
+
+		if ( $index_slug ) {
+			// (b) Meta exists but this index's slug and the __all__ sentinel are absent.
+			// Serialized PHP stores each string element wrapped in double-quotes
+			// (e.g. `s:4:"blog";`), so searching for `"slug"` with surrounding
+			// quotes matches only exact slug values, not slugs that merely contain
+			// the searched string as a substring.
+			$meta_query[] = array(
+				'relation' => 'AND',
+				array(
+					'key'     => PostExclusion::META_KEY,
+					'value'   => '"' . PostExclusion::EXCLUDE_ALL . '"',
+					'compare' => 'NOT LIKE',
+				),
+				array(
+					'key'     => PostExclusion::META_KEY,
+					'value'   => '"' . $index_slug . '"',
+					'compare' => 'NOT LIKE',
+				),
+			);
+		} else {
+			// (b) No slug known – at minimum exclude posts with the __all__ sentinel.
+			$meta_query[] = array(
+				'key'     => PostExclusion::META_KEY,
+				'value'   => '"' . PostExclusion::EXCLUDE_ALL . '"',
+				'compare' => 'NOT LIKE',
+			);
+		}
+
 		$query = new WP_Query(
 			array(
 				'post_type'      => $post_types,
@@ -137,6 +189,7 @@ class Index {
 				'offset'         => $offset,
 				'post_status'    => array_values( array_unique( $post_status ) ),
 				'fields'         => 'ids',
+				'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			)
 		);
 
