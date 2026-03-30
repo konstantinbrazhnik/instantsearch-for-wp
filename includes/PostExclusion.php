@@ -162,6 +162,10 @@ class PostExclusion {
 			return;
 		}
 
+		if ( empty( $this->get_attachment_indices() ) ) {
+			return;
+		}
+
 		add_meta_box(
 			'instantsearch_exclusion',
 			__( 'InstantSearch Index', 'instantsearch-for-wp' ),
@@ -191,6 +195,10 @@ class PostExclusion {
 		}
 
 		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
+			return;
+		}
+
+		if ( empty( $this->get_attachment_indices() ) ) {
 			return;
 		}
 
@@ -1213,20 +1221,55 @@ class PostExclusion {
 	}
 
 	/**
-	 * Resolve indices for a post type, with a PDF-attachment fallback.
-	 *
-	 * Some sites have legacy index settings where attachment post types were not
-	 * explicitly persisted in index JSON. For attachment screens we fall back to
-	 * all configured indices to keep exclusion controls available.
+	 * Resolve indices for a post type.
 	 *
 	 * @param string $post_type Post type slug.
 	 * @return array<array{slug:string,label:string,post_id:int}>
 	 */
 	private function get_post_indices( $post_type ) {
+		if ( 'attachment' === $post_type ) {
+			return $this->get_attachment_indices();
+		}
+
 		$indices = self::get_indices( $post_type );
 
-		if ( 'attachment' === $post_type && empty( $indices ) ) {
-			$indices = self::get_indices();
+		return $indices;
+	}
+
+	/**
+	 * Resolve indices that explicitly include the attachment post type.
+	 *
+	 * @return array<array{slug:string,label:string,post_id:int}>
+	 */
+	private function get_attachment_indices() {
+		$index_posts = get_posts(
+			array(
+				'post_type'      => Index::$cpt_slug,
+				'posts_per_page' => -1,
+				'post_status'    => 'publish',
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+			)
+		);
+
+		$indices = array();
+
+		foreach ( $index_posts as $index_post ) {
+			$settings = json_decode( $index_post->post_content, true ) ?? array();
+
+			if ( empty( $settings['post_types'] ) || ! is_array( $settings['post_types'] ) ) {
+				continue;
+			}
+
+			if ( ! in_array( 'attachment', $settings['post_types'], true ) ) {
+				continue;
+			}
+
+			$indices[] = array(
+				'slug'    => $index_post->post_name,
+				'label'   => $index_post->post_title,
+				'post_id' => $index_post->ID,
+			);
 		}
 
 		return $indices;

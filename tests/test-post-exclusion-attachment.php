@@ -6,7 +6,7 @@
  */
 
 /**
- * Test cases for attachment exclusion fallback behavior.
+ * Test cases for attachment exclusion behavior.
  */
 class PostExclusionAttachmentTest extends \WP_UnitTestCase {
 
@@ -90,12 +90,12 @@ class PostExclusionAttachmentTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * REST payload for an attachment should include indices via fallback logic
-	 * even when index JSON omits explicit post_types.
+	 * REST payload for an attachment should not include indices when index JSON
+	 * omits explicit attachment post type inclusion.
 	 *
 	 * @return void
 	 */
-	public function test_rest_payload_includes_indices_for_attachment_with_legacy_index_settings() {
+	public function test_rest_payload_excludes_indices_for_attachment_with_legacy_index_settings() {
 		$index_slug     = 'legacy-attachment-index';
 		$this->create_legacy_index( $index_slug );
 		$attachment_id  = $this->create_pdf_attachment();
@@ -107,17 +107,16 @@ class PostExclusionAttachmentTest extends \WP_UnitTestCase {
 		$data     = $response->get_data();
 
 		$this->assertArrayHasKey( 'indices', $data );
-		$this->assertNotEmpty( $data['indices'] );
-		$this->assertContains( $index_slug, wp_list_pluck( $data['indices'], 'slug' ) );
+		$this->assertEmpty( $data['indices'] );
 	}
 
 	/**
-	 * Saving attachment exclusions should accept slugs from fallback indices
-	 * when legacy index settings do not explicitly declare post_types.
+	 * Saving attachment exclusions should reject slugs from legacy indices when
+	 * attachment post type is not explicitly included.
 	 *
 	 * @return void
 	 */
-	public function test_save_meta_box_accepts_attachment_exclusion_slug_from_legacy_index() {
+	public function test_save_meta_box_rejects_attachment_exclusion_slug_from_legacy_index() {
 		$index_slug     = 'legacy-save-index';
 		$this->create_legacy_index( $index_slug );
 		$attachment_id  = $this->create_pdf_attachment();
@@ -132,7 +131,6 @@ class PostExclusionAttachmentTest extends \WP_UnitTestCase {
 
 		$stored = get_post_meta( $attachment_id, \InstantSearchForWP\PostExclusion::META_KEY, true );
 
-		$this->assertIsArray( $stored );
-		$this->assertSame( array( $index_slug ), $stored );
+		$this->assertEmpty( $stored );
 	}
 }
