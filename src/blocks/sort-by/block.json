@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/sort-by",
+	"version": "1.0.0",
+	"title": "Sort By",
+	"description": "A dropdown to change the sort order of search results using Algolia replica indices.",
+	"category": "instantsearch-for-wp",
+	"icon": "sort",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "sort", "order", "replica", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"attributes": {
+		"metadata": { "type": "object" },
+		"items": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "object",
+				"properties": {
+					"label": { "type": "string" },
+					"value": { "type": "string" }
+				}
+			}
+		}
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

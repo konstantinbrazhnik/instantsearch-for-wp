@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/clear-refinements",
+	"version": "1.0.0",
+	"title": "Clear Refinements",
+	"description": "A button that resets all active filters in the InstantSearch instance.",
+	"category": "instantsearch-for-wp",
+	"icon": "dismiss",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "clear", "reset", "filters", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"attributes": {
+		"metadata": { "type": "object" },
+		"buttonLabel": { "type": "string", "default": "Clear refinements" },
+		"includedAttributes": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}
