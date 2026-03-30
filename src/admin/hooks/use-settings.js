@@ -35,6 +35,7 @@ const useSettings = () => {
 	const saveSettings = (newSettings = {}) => {
 		setLoading(true);
 		const instantsearch_for_wp_settings = {
+			...settings,
 			provider,
 			algolia: algoliaConfig,
 			...newSettings

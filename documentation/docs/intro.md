@@ -6,6 +6,12 @@ sidebar_position: 0
 
 Welcome to the official documentation for the Yoko Core plugin.
 
+## AI Integration Instructions
+
+Use this guide for theme/plugin integration work involving custom facets and custom Algolia record fields:
+
+- [AI Agent Integrations](./ai-agent-integrations.md)
+
 ## How to create new documentation.
 
 1. The Docusaurus blog is the changelog (in the `/blog` folder).

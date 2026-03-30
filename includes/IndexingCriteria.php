@@ -44,14 +44,25 @@ class IndexingCriteria {
 		}
 
 		$indexes = Settings::get_settings( 'indexes' );
-		if ( ! empty( $indexes ) ) {
-			$index = $indexes[0];
-			if ( isset( $index['post_types'] ) && is_array( $index['post_types'] ) ) {
+		if ( is_array( $indexes ) && ! empty( $indexes ) ) {
+			$index = null;
+
+			if ( isset( $indexes['post_types'] ) ) {
+				$index = $indexes;
+			} else {
+				$indexes_values = array_values( $indexes );
+				$first_index    = isset( $indexes_values[0] ) ? $indexes_values[0] : null;
+				if ( is_array( $first_index ) ) {
+					$index = $first_index;
+				}
+			}
+
+			if ( is_array( $index ) && isset( $index['post_types'] ) && is_array( $index['post_types'] ) ) {
 				if ( in_array( $post->post_type, $index['post_types'], true ) ) {
 					return $should_index;
-				} else {
-					return false;
 				}
+
+				return false;
 			}
 		}
 
@@ -78,6 +89,10 @@ class IndexingCriteria {
 	 */
 	public function indexing_post_status( $should_index, $post_id, $post ) {
 		if ( null !== $should_index ) {
+			return $should_index;
+		}
+
+		if ( $this->is_selected_pdf_attachment( $post ) ) {
 			return $should_index;
 		}
 
@@ -134,5 +149,38 @@ class IndexingCriteria {
 		}
 
 		return $should_index;
+	}
+
+	/**
+	 * Determine if the post is a PDF attachment and attachment indexing is enabled.
+	 *
+	 * @param \WP_Post $post Post object.
+	 * @return bool
+	 */
+	private function is_selected_pdf_attachment( $post ) {
+		if ( 'attachment' !== $post->post_type || 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
+			return false;
+		}
+
+		$indexes = Settings::get_settings( 'indexes' );
+		if ( ! is_array( $indexes ) || empty( $indexes ) ) {
+			return false;
+		}
+
+		$index = null;
+		if ( isset( $indexes['post_types'] ) ) {
+			$index = $indexes;
+		} else {
+			$indexes_values = array_values( $indexes );
+			$first_index    = isset( $indexes_values[0] ) ? $indexes_values[0] : null;
+			if ( is_array( $first_index ) ) {
+				$index = $first_index;
+			}
+		}
+
+		return is_array( $index )
+			&& isset( $index['post_types'] )
+			&& is_array( $index['post_types'] )
+			&& in_array( 'attachment', $index['post_types'], true );
 	}
 }

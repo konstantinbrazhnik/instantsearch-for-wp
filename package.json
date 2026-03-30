@@ -20,7 +20,7 @@
     "lint:css": "wp-scripts lint-style",
     "lint:js": "wp-scripts lint-js",
     "packages-update": "wp-scripts packages-update",
-    "plugin-zip": "wp-scripts plugin-zip",
+    "plugin-zip": "composer install --no-dev && npm prune --production && wp-scripts plugin-zip",
     "start": "wp-scripts start --webpack-copy-php",
     "typesense": "brew install typesense/tap/typesense-server@28.0 && brew services start typesense-server@28.0",
     "typesense:docker": "mkdir \"$(pwd)\"/typesense-data && docker-compose up",
@@ -30,12 +30,20 @@
     "typesense:dashboard": "git clone https://github.com/bfritscher/typesense-dashboard.git && cd typesense-dashboard && npm install && PUBLIC_PATH=\"/wp-content/plugins/yoko-core/assets/js/ts-dashboard\" npm run build && mv dist/* ../assets/js/ts-dashboard/ && cd .. && rm -rf typesense-dashboard"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^30.12.0",
     "grunt": "~0.4.5",
     "grunt-wp-i18n": "~0.5.0",
     "grunt-wp-readme-to-markdown": "~1.0.0",
-    "husky": "^9.1.3"
+    "husky": "^9.1.3",
+    "typesense-instantsearch-adapter": "^2.9.0"
   },
+  "files": [
+    "assets/",
+    "includes/",
+    "build/",
+    "vendor/",
+    "instantsearch-for-wp.php",
+    "readme.txt"
+  ],
   "dependencies": {
     "@babel/runtime": "^7.27.6",
     "@wordpress/api-fetch": "^7.31.0",
@@ -46,11 +54,12 @@
     "@wordpress/i18n": "^6.4.0",
     "@wordpress/icons": "^10.31.0",
     "@wordpress/notices": "^5.31.0",
-    "a11y-dialog": "^8.1.4",
-    "alpinejs": "^3.14.1",
     "body-scroll-lock": "^4.0.0-beta.0",
+    "a11y-dialog": "^8.1.4",
+    "ai": "^6.0.133",
+    "marked": "^17.0.5",
     "instantsearch.css": "^8.5.1",
     "instantsearch.js": "^4.7.0",
-    "typesense-instantsearch-adapter": "^2.9.0"
+    "@wordpress/scripts": "^30.12.0"
   }
 }

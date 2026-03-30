@@ -117,6 +117,9 @@ class Indexer {
 			add_filter(
 				self::$delete_post_ids_hook,
 				function ( $post_ids ) use ( $post_id ) {
+					if ( ! is_array( $post_ids ) ) {
+						$post_ids = empty( $post_ids ) ? array() : (array) $post_ids;
+					}
 					$post_ids[] = $post_id;
 					return array_values( array_unique( $post_ids ) );
 				}
@@ -127,6 +130,9 @@ class Indexer {
 		add_filter(
 			self::$index_post_ids_hook,
 			function ( $post_ids ) use ( $post_id ) {
+				if ( ! is_array( $post_ids ) ) {
+					$post_ids = empty( $post_ids ) ? array() : (array) $post_ids;
+				}
 				$post_ids[] = $post_id;
 				return array_values( array_unique( $post_ids ) );
 			}
@@ -144,11 +150,17 @@ class Indexer {
 	 */
 	public function index_or_delete_posts( $post_ids = array(), $delete_post_ids = array(), $index = null ) {
 		$post_ids = apply_filters( self::$index_post_ids_hook, $post_ids );
+		if ( ! is_array( $post_ids ) ) {
+			$post_ids = empty( $post_ids ) ? array() : (array) $post_ids;
+		}
 		if ( ! empty( $post_ids ) ) {
 			$indexed_response = $this->provider->index_posts( $post_ids, $index );
 		}
 
 		$delete_post_ids = apply_filters( self::$delete_post_ids_hook, $delete_post_ids );
+		if ( ! is_array( $delete_post_ids ) ) {
+			$delete_post_ids = empty( $delete_post_ids ) ? array() : (array) $delete_post_ids;
+		}
 		if ( ! empty( $delete_post_ids ) ) {
 			$deleted_response = $this->provider->delete_posts( $delete_post_ids, $index );
 		}

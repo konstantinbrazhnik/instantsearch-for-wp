@@ -15,6 +15,40 @@ class SiteSearch {
 
 		// Enqueue frontend scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+		// Connect CSS Selector option to the search trigger query selectors filter.
+		add_filter(
+			'instantsearch_for_wp_search_trigger_query_selectors',
+			array( $this, 'connect_css_selector_option_to_filter' ),
+			9
+		);
+	}
+
+	/**
+	 * Check if conversational search is enabled in settings.
+	 *
+	 * @return bool True if conversational search is enabled, false otherwise.
+	 */
+	public function is_conversational_search_enabled() {
+		$settings = Settings::get_settings();
+		return apply_filters( 'instantsearch_for_wp_conversational_search_enabled', $settings['conversational_search'] ?? true );
+	}
+
+	/**
+	 * Check if AI summaries are enabled and valid for Algolia.
+	 *
+	 * @return bool
+	 */
+	public function is_ai_summaries_enabled() {
+		$settings = Settings::get_settings();
+
+		if ( empty( $settings['provider'] ) || 'algolia' !== $settings['provider'] ) {
+			return false;
+		}
+
+		$algolia = isset( $settings['algolia'] ) && is_array( $settings['algolia'] ) ? $settings['algolia'] : array();
+
+		return ! empty( $algolia['ai_summaries_enabled'] ) && ! empty( $algolia['ask_ai_agent_id'] );
 	}
 
 	/**
@@ -43,6 +77,9 @@ class SiteSearch {
 		if ( $image ) {
 			$logo_url = $image[0];
 		}
+
+		$is_conversational_search = $this->is_conversational_search_enabled();
+		$is_ai_summaries_enabled  = $this->is_ai_summaries_enabled();
 		?>
 		<div id="isfwp-site-search" class="<?php echo esc_attr( implode( ' ', $search_classes ) ); ?>">
 			<div class="isfwp-site-search-topbar">
@@ -68,10 +105,18 @@ class SiteSearch {
 				</div>
 				<div class="isfwp-site-search-container">
 					<div id="isfwp-site-search-sidebar"></div>
-					<div id="isfwp-site-search-hits"></div>
+					<div id="isfwp-site-search-results">
+						<?php if ( $is_ai_summaries_enabled ) : ?>
+							<div id="isfwp-site-search-summary" aria-live="polite" hidden="hidden"></div>
+						<?php endif; ?>
+						<div id="isfwp-site-search-hits"></div>
+					</div>
 				</div>
 			</div>
 		</div>
+		<?php if ( $is_conversational_search ) : ?>
+			<div id="algolia-chat"></div>
+		<?php endif; ?>
 		<?php
 	}
 
@@ -93,6 +138,7 @@ class SiteSearch {
 		return apply_filters(
 			'instantsearch_for_wp_instantsearch_config',
 			array(
+				'provider' 				      => $settings['provider'],
 				'indexName'                   => Settings::get_index_name( $settings['use_as_sitesearch'] ),
 				'facetTitles'                 => array_merge(
 					array(
@@ -100,8 +146,21 @@ class SiteSearch {
 					),
 					$taxonomy_titles
 				),
-				'searchTriggerQuerySelectors' => '.menu-item .fl-search-form .fl-button-wrap > a,.swp-input--search',
+				'searchTriggerQuerySelectors' => implode(
+					',',
+					apply_filters(
+						'instantsearch_for_wp_search_trigger_query_selectors',
+						array()
+					)
+				),
 				'sitesearchSettings'          => $settings['sitesearch_settings'] ?? array(),
+				'conversationalSearch'        => $this->is_conversational_search_enabled()
+					? apply_filters( 'instantsearch_for_wp_conversational_search_agent_id', null )
+					: false,
+				'aiSummaries'                 => array(
+					'enabled'  => $this->is_ai_summaries_enabled(),
+					'agentId'  => $settings['algolia']['ask_ai_agent_id'] ?? '',
+				),
 			)
 		);
 	}
@@ -125,10 +184,16 @@ class SiteSearch {
 			$assets = require $asset_file;
 		}
 
+		$dependencies = isset( $assets['dependencies'] ) ? $assets['dependencies'] : array( 'wp-element' );
+		// If the wp-hooks package isn't included in the build, ensure that 'wp-hooks' is added as a dependency for the frontend script.
+		if ( ! in_array( 'wp-hooks', $dependencies, true ) ) {
+			$dependencies[] = 'wp-hooks';
+		}
+
 		wp_enqueue_script(
 			'instantsearch-for-wp-frontend',
 			$script_url,
-			isset( $assets['dependencies'] ) ? $assets['dependencies'] : array( 'wp-element' ),
+			$dependencies,
 			isset( $assets['version'] ) ? $assets['version'] : INSTANTSEARCH_FOR_WP_VERSION,
 			true
 		);
@@ -150,11 +215,19 @@ class SiteSearch {
 		}
 
 		// Localize script with configuration data.
-		$settings = Settings::get_settings();
 		wp_localize_script(
 			'instantsearch-for-wp-frontend',
 			'instantSearchForWPFrontend',
 			$this->get_instantsearch_config()
 		);
+	}
+
+	public function connect_css_selector_option_to_filter( $selectors ) {
+		$settings = Settings::get_settings();
+		if ( ! empty( $settings['sitesearch_settings']['css_selector_triggers'] ) ) {
+			$custom_selectors = array_map( 'trim', explode( ',', $settings['sitesearch_settings']['css_selector_triggers'] ) );
+			$selectors        = array_merge( $selectors, $custom_selectors );
+		}
+		return $selectors;
 	}
 }

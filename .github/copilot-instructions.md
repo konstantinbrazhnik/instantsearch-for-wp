@@ -2,6 +2,14 @@
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
+## Integration Extensions
+
+When implementing theme or plugin integrations for Algolia indexing, follow this guide first:
+
+- [AI Agent Integrations](../documentation/docs/ai-agent-integrations.md)
+
+This guide defines the required filter sequence for custom facets and custom record fields.
+
 ## Project Overview
 
 **InstantSearch for WP** is a WordPress plugin that provides a set of Gutenberg Blocks for InstantSearch.js widgets, enabling powerful search functionality through with search providers like Algolia and Typesense Melei search. This plugin follows WordPress coding standards and modern development practices.
