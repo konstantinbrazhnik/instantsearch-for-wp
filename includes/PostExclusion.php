@@ -148,7 +148,8 @@ class PostExclusion {
 	 * Register the exclusion meta box for PDF attachments.
 	 *
 	 * Attachment indexing in this plugin is PDF-only, so this UI is
-	 * intentionally shown only for PDF media items.
+	 * intentionally shown only for PDF media items that belong to at least
+	 * one index configured to include the 'attachment' post type.
 	 *
 	 * @param \WP_Post $post Current attachment post object.
 	 * @return void
@@ -159,6 +160,14 @@ class PostExclusion {
 		}
 
 		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
+			return;
+		}
+
+		// Only register the meta box when at least one index is configured
+		// to index 'attachment' post type.  Without this guard, the box would
+		// appear on every PDF with the unhelpful "No search indices configured"
+		// message even when no index includes attachments.
+		if ( empty( self::get_indices( 'attachment' ) ) ) {
 			return;
 		}
 
@@ -176,7 +185,8 @@ class PostExclusion {
 	 * Render exclusion controls in the attachment submit box as a fallback.
 	 *
 	 * Some media edit flows do not surface custom metaboxes consistently.
-	 * This ensures the controls remain visible for PDF attachments.
+	 * This ensures the controls remain visible for PDF attachments when at
+	 * least one index is configured to include the 'attachment' post type.
 	 *
 	 * @param \WP_Post $post Current attachment post object.
 	 * @return void
@@ -191,6 +201,12 @@ class PostExclusion {
 		}
 
 		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
+			return;
+		}
+
+		// Mirror the guard from add_attachment_meta_box(): only render when
+		// at least one index is configured to include PDF attachments.
+		if ( empty( self::get_indices( 'attachment' ) ) ) {
 			return;
 		}
 
