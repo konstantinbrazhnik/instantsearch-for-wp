@@ -24,10 +24,11 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 
 	useEffect(() => {
 		setUseSearchSettings({
+			algolia: settings?.algolia || {},
 			use_as_sitesearch: settings?.use_as_sitesearch || false,
 			sitesearch_settings: settings?.sitesearch_settings || {}
 		});
-	}, [settings?.use_as_sitesearch, settings?.sitesearch_settings]);
+	}, [settings?.use_as_sitesearch, settings?.sitesearch_settings, settings?.algolia]);
 	
 	const saveSearchSettings = async () => {
 		setLoading(true);
@@ -125,7 +126,7 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 								...prev,
 								algolia: {
 									...prev.algolia,
-									hide_algolia_badge: value,
+									hide_algolia_badge: !!value,
 								}
 							}))}
 						/>

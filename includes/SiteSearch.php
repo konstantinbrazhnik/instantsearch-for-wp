@@ -138,6 +138,7 @@ class SiteSearch {
 		return apply_filters(
 			'instantsearch_for_wp_instantsearch_config',
 			array(
+				'provider' 				      => $settings['provider'],
 				'indexName'                   => Settings::get_index_name( $settings['use_as_sitesearch'] ),
 				'facetTitles'                 => array_merge(
 					array(

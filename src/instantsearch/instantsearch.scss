@@ -100,7 +100,7 @@
 }
 
 /* Hid the sidebar on smaller screens */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	#isfwp-site-search-sidebar {
 		display: none;
 	}
@@ -121,6 +121,14 @@
 	flex-direction: column;
 	gap: calc( var(--isfwp-gap-spacing) / 2 );
 }
+
+
+@media (min-width: 768px) {
+	#isfwp-site-search-results {
+		max-width: 66.666666%;
+	}
+}
+
 
 #isfwp-site-search-summary {
 	padding: calc( var(--isfwp-gap-spacing) / 2 );

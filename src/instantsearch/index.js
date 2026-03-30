@@ -15,6 +15,7 @@ import {
 	searchBox,
 	stats
 } from "instantsearch.js/es/widgets";
+import { createAiSummaryController } from './ai-summary';
 import { __ } from '@wordpress/i18n';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 
@@ -22,34 +23,10 @@ const container = document.getElementById('isfwp-site-search');
 const dialog = new A11yDialog(container);
 let isInitialized = false;
 
-const aiSummariesConfig = instantSearchForWPFrontend?.aiSummaries || {};
-const shouldLoadAiSummary =
-	instantSearchForWPFrontend?.provider === 'algolia'
-	&& !!aiSummariesConfig?.enabled;
-
-const noopSummaryController = {
-	isEnabled: false,
-	handleQueryChange() {},
-	reset() {},
-};
-
-let summaryController = noopSummaryController;
-
-if (shouldLoadAiSummary) {
-	import(
-		/* webpackChunkName: "ai-summary" */
-		'./ai-summary'
-	)
-		.then(({ createAiSummaryController }) => {
-			summaryController = createAiSummaryController({
-				container: document.getElementById('isfwp-site-search-summary'),
-				frontendConfig: instantSearchForWPFrontend,
-			});
-		})
-		.catch(() => {
-			summaryController = noopSummaryController;
-		});
-}
+const summaryController = createAiSummaryController({
+	container: document.getElementById('isfwp-site-search-summary'),
+	frontendConfig: instantSearchForWPFrontend,
+});
 
 // Initiate InstantSearch instance
 const search = instantsearch({
