@@ -2,7 +2,7 @@
 const { expect } = require('@playwright/test');
 require('dotenv').config({ path: '../../.env' });
 
-const BASE_URL = process.env.WP_SITE_URL || 'http://instantsearch-dev.local:8080';
+const BASE_URL = process.env.WP_SITE_URL || 'http://localhost:8080';
 const ADMIN_USER = process.env.WP_ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD || 'admin';
 
@@ -15,7 +15,7 @@ const SELECTORS = {
   // Search input inside the InstantSearch widget
   searchInput: '.ais-SearchBox-input, input[placeholder*="search" i], input[type="search"]',
   // Search result hits container
-  hitsContainer: '.ais-Hits, .ais-InfiniteHits, [data-instantsearch-hits]',
+  hitsContainer: '#isfwp-site-search-hits, .ais-Hits, .ais-InfiniteHits, [data-instantsearch-hits]',
   // Individual hit item
   hitItem: '.ais-Hits-item, .ais-InfiniteHits-item',
   // RefinementList (facets) container

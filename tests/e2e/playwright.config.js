@@ -2,9 +2,10 @@
 const { defineConfig, devices } = require('@playwright/test');
 require('dotenv').config({ path: '../../.env' });
 
-const BASE_URL = process.env.WP_SITE_URL || 'http://instantsearch-dev.local:8080';
+const BASE_URL = process.env.WP_SITE_URL || 'http://localhost:8080';
 const ADMIN_USER = process.env.WP_ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD || 'admin';
+const IGNORE_HTTPS_ERRORS = process.env.WP_IGNORE_HTTPS_ERRORS === '1';
 
 /**
  * Playwright configuration for InstantSearch for WP E2E tests.
@@ -33,6 +34,7 @@ module.exports = defineConfig({
 
   use: {
     baseURL: BASE_URL,
+    ignoreHTTPSErrors: IGNORE_HTTPS_ERRORS,
 
     /* Always capture screenshots on failure */
     screenshot: 'only-on-failure',
@@ -83,5 +85,6 @@ module.exports = defineConfig({
     baseURL: BASE_URL,
     adminUser: ADMIN_USER,
     adminPass: ADMIN_PASS,
+    ignoreHTTPSErrors: IGNORE_HTTPS_ERRORS,
   },
 });

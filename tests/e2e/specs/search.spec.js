@@ -200,8 +200,8 @@ test.describe('Admin interface', () => {
     await page.click('#wp-submit');
     await page.waitForURL('**/wp-admin/**', { timeout: 15_000 });
 
-    // Navigate to the plugin page — it registers under 'instantsearch-for-wp'
-    await page.goto(`${BASE_URL}/wp-admin/admin.php?page=instantsearch-for-wp`);
+    // Navigate to the plugin page — it registers under 'instantsearch-settings'.
+    await page.goto(`${BASE_URL}/wp-admin/admin.php?page=instantsearch-settings`);
     await page.waitForLoadState('networkidle');
 
     // Admin page should load without a fatal error

@@ -29,7 +29,7 @@ services:
 
   # ── Typesense (local search backend) ──────────────────────
   typesense:
-    image: typesense/typesense:28.0.0
+    image: typesense/typesense:28.0
     restart: unless-stopped
     environment:
       TYPESENSE_DATA_DIR: /data

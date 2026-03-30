@@ -149,6 +149,13 @@ class Indexer {
 	 * @return array Array containing responses for indexed and deleted posts.
 	 */
 	public function index_or_delete_posts( $post_ids = array(), $delete_post_ids = array(), $index = null ) {
+		if ( ! $this->provider || ! method_exists( $this->provider, 'index_posts' ) || ! method_exists( $this->provider, 'delete_posts' ) ) {
+			return array(
+				'indexed' => null,
+				'deleted' => null,
+			);
+		}
+
 		$post_ids = apply_filters( self::$index_post_ids_hook, $post_ids );
 		if ( ! is_array( $post_ids ) ) {
 			$post_ids = empty( $post_ids ) ? array() : (array) $post_ids;

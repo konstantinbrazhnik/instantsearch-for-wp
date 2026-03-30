@@ -140,22 +140,6 @@ class SiteSearch {
 	}
 
 	/**
-	 * Add a floating search trigger button to the page.
-	 *
-	 * @return void
-	 */
-	public function add_search_trigger_button() {
-		?>
-		<button class="isfwp-search-trigger isfwp-floating-trigger" aria-label="<?php esc_attr_e( 'Open search', 'instantsearch-for-wp' ); ?>">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<circle cx="11" cy="11" r="8"></circle>
-				<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-			</svg>
-		</button>
-		<?php
-	}
-
-	/**
 	 * Get InstantSearch configuration for frontend.
 	 *
 	 * @return array Configuration array for InstantSearch.js

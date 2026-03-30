@@ -2,9 +2,10 @@
 const { chromium } = require('@playwright/test');
 require('dotenv').config({ path: '../../.env' });
 
-const BASE_URL = process.env.WP_SITE_URL || 'http://instantsearch-dev.local:8080';
+const BASE_URL = process.env.WP_SITE_URL || 'http://localhost:8080';
 const ADMIN_USER = process.env.WP_ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD || 'admin';
+const IGNORE_HTTPS_ERRORS = process.env.WP_IGNORE_HTTPS_ERRORS === '1';
 
 /**
  * Global setup: verify WordPress is running and store auth state.
@@ -12,7 +13,7 @@ const ADMIN_PASS = process.env.WP_ADMIN_PASSWORD || 'admin';
  */
 async function globalSetup() {
   const browser = await chromium.launch();
-  const page = await browser.newPage();
+  const page = await browser.newPage({ ignoreHTTPSErrors: IGNORE_HTTPS_ERRORS });
 
   // Verify site is up
   try {
@@ -37,7 +38,7 @@ async function globalSetup() {
   await page.waitForURL('**/wp-admin/**', { timeout: 15_000 });
 
   // Save authenticated state for use in admin tests
-  await page.context().storageState({ path: 'test-results/.auth.json' });
+  await page.context().storageState({ path: 'tests/e2e/test-results/.auth.json' });
 
   await browser.close();
   console.log(`[global-setup] WordPress verified at ${BASE_URL}`);

@@ -18,7 +18,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DC_FILE="$REPO_ROOT/dev/docker-compose.yml"
-DC="docker-compose -f $DC_FILE"
+DC=(docker-compose -f "$DC_FILE")
 E2E_DIR="$REPO_ROOT/tests/e2e"
 
 # ── Colours ───────────────────────────────────────────────────────────────────
@@ -50,9 +50,9 @@ check_deps() {
 
   # Prefer 'docker compose' (v2 plugin) over 'docker-compose' (v1 standalone)
   if docker compose version &>/dev/null 2>&1; then
-    DC="docker compose -f $DC_FILE"
+    DC=(docker compose -f "$DC_FILE")
   elif command -v docker-compose &>/dev/null; then
-    DC="docker-compose -f $DC_FILE"
+    DC=(docker-compose -f "$DC_FILE")
   else
     missing+=("docker-compose (or Docker Compose v2 plugin)")
   fi
@@ -85,7 +85,7 @@ wait_healthy() {
   local retries=60
 
   info "Waiting for $label to be healthy..."
-  until $DC ps "$service" 2>/dev/null | grep -E "(healthy|running)" &>/dev/null; do
+  until "${DC[@]}" ps "$service" 2>/dev/null | grep -E "(healthy|running)" &>/dev/null; do
     retries=$((retries - 1))
     [ "$retries" -le 0 ] && die "$label did not become healthy in time. Run './dev.sh logs' to diagnose."
     sleep 2
@@ -113,7 +113,7 @@ cmd_up() {
   ensure_hosts_entry
 
   info "Starting Docker services..."
-  $DC up -d --remove-orphans
+  "${DC[@]}" up -d --remove-orphans
 
   # Wait for critical services
   wait_healthy db        "MySQL"
@@ -128,39 +128,53 @@ cmd_down() {
   load_env
   check_deps
   info "Stopping Docker services..."
-  $DC down
+  "${DC[@]}" down
   success "All services stopped."
 }
 
 cmd_test() {
   load_env
   check_deps
+  ensure_hosts_entry
 
-  info "Setting up Playwright..."
-  cd "$E2E_DIR"
-
-  # Install deps if node_modules is missing
-  if [ ! -d "node_modules" ]; then
-    npm install
+  # If docker services are not running, start them first.
+  if ! "${DC[@]}" ps wordpress 2>/dev/null | grep -E "(healthy|running)" &>/dev/null; then
+    info "Docker services are not running. Booting test environment..."
+    cmd_up
   fi
 
-  # Install Playwright browsers if missing
-  if [ ! -d "$(npm root)/@playwright/test" ] && \
-     ! npx playwright --version &>/dev/null 2>&1; then
-    npm install
+  # Fall back to localhost when the custom dev hostname does not resolve.
+  if ! curl -sSfI "${WP_SITE_URL:-http://instantsearch-dev.local:8080}" >/dev/null 2>&1; then
+    warn "Configured WP_SITE_URL is not reachable; falling back to http://localhost:8080 for tests."
+    export WP_SITE_URL="http://localhost:8080"
+  fi
+
+  info "Syncing WordPress URL settings for test run..."
+  "${DC[@]}" run --rm wpcli option update home "$WP_SITE_URL" >/dev/null 2>&1 || true
+  "${DC[@]}" run --rm wpcli option update siteurl "$WP_SITE_URL" >/dev/null 2>&1 || true
+
+  info "Applying e2e plugin settings..."
+  "${DC[@]}" run --rm wpcli option update instantsearch_for_wp_settings \
+    '{"provider":"algolia","algolia":{"app_id":"demo-app","search_only_api_key":"demo-key","admin_api_key":"demo-admin-key"},"use_as_sitesearch":true,"sitesearch_settings":{"placeholder_text":"Search...","sidebar_position":"left","snippet_length":50,"css_selector_triggers":".isfwp-search-trigger","debounce_delay":0}}' \
+    --format=json >/dev/null 2>&1 || true
+
+  info "Setting up Playwright..."
+  cd "$REPO_ROOT"
+
+  # Use root-level tooling so tests do not require optional gif dependencies (canvas).
+  if [ ! -d "node_modules/@playwright/test" ] || [ ! -d "node_modules/dotenv" ]; then
+    npm install --no-save @playwright/test dotenv
   fi
 
   # Install browser binaries
   npx playwright install chromium 2>/dev/null || true
 
   # Create test-results dir
-  mkdir -p test-results
+  mkdir -p "$E2E_DIR/test-results"
 
   info "Running E2E tests..."
-  npx playwright test "$@"
+  npx playwright test --config "$E2E_DIR/playwright.config.js" "$@"
   local exit_code=$?
-
-  cd "$REPO_ROOT"
 
   if [ $exit_code -eq 0 ]; then
     success "All tests passed."
@@ -214,7 +228,7 @@ cmd_reset() {
   fi
 
   info "Stopping containers and removing volumes..."
-  $DC down -v
+  "${DC[@]}" down -v
 
   info "Restarting fresh..."
   cmd_up
@@ -224,20 +238,20 @@ cmd_logs() {
   load_env
   check_deps
   info "Tailing WordPress and MySQL logs (Ctrl+C to stop)..."
-  $DC logs -f wordpress db
+  "${DC[@]}" logs -f wordpress db
 }
 
 cmd_wpcli() {
   load_env
   check_deps
-  $DC run --rm wpcli "$@"
+  "${DC[@]}" run --rm wpcli "$@"
 }
 
 cmd_shell() {
   load_env
   check_deps
   info "Opening bash shell in WordPress container..."
-  $DC exec wordpress bash
+  "${DC[@]}" exec wordpress bash
 }
 
 cmd_build() {
@@ -252,7 +266,7 @@ cmd_status() {
   check_deps
   echo ""
   echo -e "${BOLD}Service Status:${NC}"
-  $DC ps 2>/dev/null || true
+  "${DC[@]}" ps 2>/dev/null || true
   echo ""
   echo -e "${BOLD}URLs:${NC}"
   echo -e "  Site:   ${CYAN}http://instantsearch-dev.local:8080${NC}"
