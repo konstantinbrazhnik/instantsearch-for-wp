@@ -1,0 +1,164 @@
+/* Frontend styles for the InstantSearch container block */
+
+.isfwp-block-instance {
+	position: relative;
+}
+
+/* Import base InstantSearch styles */
+.isfwp-block-instance .ais-Hits-list {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 280px, 1fr ) );
+	gap: 1.5rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.isfwp-block-instance .ais-Hits-item {
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	padding: 1rem;
+}
+
+.isfwp-block-instance .ais-SearchBox-form {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+}
+
+.isfwp-block-instance .ais-SearchBox-input {
+	flex: 1;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #cbd5e0;
+	border-radius: 4px;
+	font-size: 1rem;
+}
+
+.isfwp-block-instance .ais-SearchBox-submit,
+.isfwp-block-instance .ais-SearchBox-reset {
+	padding: 0.5rem 1rem;
+	border: 1px solid #cbd5e0;
+	border-radius: 4px;
+	cursor: pointer;
+	background: #f7fafc;
+}
+
+.isfwp-block-instance .ais-Pagination-list {
+	display: flex;
+	list-style: none;
+	margin: 1rem 0 0;
+	padding: 0;
+	gap: 0.25rem;
+}
+
+.isfwp-block-instance .ais-Pagination-item {
+	a, span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2rem;
+		height: 2rem;
+		padding: 0 0.5rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 4px;
+		text-decoration: none;
+		color: inherit;
+	}
+}
+
+.isfwp-block-instance .ais-Pagination-item--selected a {
+	background: #3182ce;
+	border-color: #3182ce;
+	color: #fff;
+}
+
+.isfwp-block-instance .ais-Pagination-item--disabled span {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.isfwp-block-instance .ais-Stats {
+	font-size: 0.875rem;
+	color: #718096;
+	margin-bottom: 0.75rem;
+}
+
+.isfwp-block-instance .ais-RefinementList {
+	margin-bottom: 1rem;
+}
+
+.isfwp-block-instance .ais-RefinementList-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.isfwp-block-instance .ais-RefinementList-item {
+	padding: 0.25rem 0;
+}
+
+.isfwp-block-instance .ais-RefinementList-labelText {
+	margin-left: 0.5rem;
+}
+
+.isfwp-block-instance .ais-RefinementList-count {
+	margin-left: 0.5rem;
+	font-size: 0.75rem;
+	color: #718096;
+}
+
+.isfwp-block-instance .ais-ClearRefinements-button {
+	padding: 0.375rem 0.75rem;
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.875rem;
+}
+
+.isfwp-block-instance .ais-ClearRefinements-button--disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.isfwp-block-instance .ais-CurrentRefinements-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	list-style: none;
+	margin: 0 0 0.75rem;
+	padding: 0;
+}
+
+.isfwp-block-instance .ais-CurrentRefinements-item {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.5rem;
+	background: #ebf8ff;
+	border: 1px solid #bee3f8;
+	border-radius: 9999px;
+	font-size: 0.8125rem;
+}
+
+.isfwp-block-instance .ais-CurrentRefinements-delete {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	line-height: 1;
+	color: #2b6cb0;
+}
+
+.isfwp-block-instance .ais-SortBy-select {
+	padding: 0.375rem 0.75rem;
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	font-size: 0.875rem;
+	background: #fff;
+}
+
+.isfwp-block-instance mark {
+	background-color: #fefcbf;
+	color: inherit;
+}
