@@ -176,7 +176,10 @@ class Settings {
 			'properties' => array(
 				'provider' => array(
 					'type' => 'string',
-					'enum' => array(),
+					'enum' => array(
+						'algolia',
+						'typesense',
+					),
 				),
 				// Whethet to use an index for site search.
 				// Either a boolean or the name of the index to use.
