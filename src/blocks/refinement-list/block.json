@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/refinement-list",
+	"version": "1.0.0",
+	"title": "Refinement List",
+	"description": "A facet filter list for an attribute. Lets users narrow search results.",
+	"category": "instantsearch-for-wp",
+	"icon": "filter",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "facet", "filter", "refinement", "taxonomy", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"attributes": {
+		"metadata": { "type": "object" },
+		"attribute": { "type": "string", "default": "post_type" },
+		"label": { "type": "string", "default": "" },
+		"limit": { "type": "number", "default": 10 },
+		"showMore": { "type": "boolean", "default": false },
+		"showMoreLimit": { "type": "number", "default": 20 },
+		"showCount": { "type": "boolean", "default": true },
+		"sortBy": { "type": "string", "default": "isRefined,count:desc,name:asc" }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}
