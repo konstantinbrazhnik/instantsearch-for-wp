@@ -148,8 +148,7 @@ class PostExclusion {
 	 * Register the exclusion meta box for PDF attachments.
 	 *
 	 * Attachment indexing in this plugin is PDF-only, so this UI is
-	 * intentionally shown only for PDF media items that belong to at least
-	 * one index configured to include the 'attachment' post type.
+	 * intentionally shown only for PDF media items.
 	 *
 	 * @param \WP_Post $post Current attachment post object.
 	 * @return void
@@ -160,14 +159,6 @@ class PostExclusion {
 		}
 
 		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
-			return;
-		}
-
-		// Only register the meta box when at least one index is configured
-		// to index 'attachment' post type.  Without this guard, the box would
-		// appear on every PDF with the unhelpful "No search indices configured"
-		// message even when no index includes attachments.
-		if ( empty( self::get_indices( 'attachment' ) ) ) {
 			return;
 		}
 
@@ -185,8 +176,7 @@ class PostExclusion {
 	 * Render exclusion controls in the attachment submit box as a fallback.
 	 *
 	 * Some media edit flows do not surface custom metaboxes consistently.
-	 * This ensures the controls remain visible for PDF attachments when at
-	 * least one index is configured to include the 'attachment' post type.
+	 * This ensures the controls remain visible for PDF attachments.
 	 *
 	 * @param \WP_Post $post Current attachment post object.
 	 * @return void
@@ -201,12 +191,6 @@ class PostExclusion {
 		}
 
 		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
-			return;
-		}
-
-		// Mirror the guard from add_attachment_meta_box(): only render when
-		// at least one index is configured to include PDF attachments.
-		if ( empty( self::get_indices( 'attachment' ) ) ) {
 			return;
 		}
 
@@ -225,7 +209,7 @@ class PostExclusion {
 		wp_nonce_field( 'instantsearch_exclusion_nonce', 'instantsearch_exclusion_nonce' );
 
 		$exclusions = self::get_exclusions( $post->ID );
-		$indices    = self::get_indices( $post->post_type );
+		$indices    = $this->get_post_indices( $post->post_type );
 		$status     = $this->get_index_status_data( $post, $indices, $exclusions );
 
 		if ( empty( $indices ) ) {
@@ -355,7 +339,7 @@ class PostExclusion {
 		} else {
 			$raw = isset( $_POST['instantsearch_exclude_indices'] ) ? (array) $_POST['instantsearch_exclude_indices'] : array();
 			// Sanitize: keep only valid index slugs.
-			$valid_slugs    = wp_list_pluck( self::get_indices( $post->post_type ), 'slug' );
+			$valid_slugs    = wp_list_pluck( $this->get_post_indices( $post->post_type ), 'slug' );
 			$new_exclusions = array_values( array_intersect( array_map( 'sanitize_key', $raw ), $valid_slugs ) );
 		}
 
@@ -491,7 +475,7 @@ class PostExclusion {
 		return rest_ensure_response(
 			array(
 				'exclusions' => self::get_exclusions( $post_id ),
-				'indices'    => self::get_indices( $post->post_type ),
+				'indices'    => $this->get_post_indices( $post->post_type ),
 			)
 		);
 	}
@@ -512,7 +496,7 @@ class PostExclusion {
 		// Validate: allow only valid index slugs or the __all__ sentinel.
 		$valid_slugs = array_merge(
 			array( self::EXCLUDE_ALL ),
-			wp_list_pluck( self::get_indices( $post->post_type ), 'slug' )
+			wp_list_pluck( $this->get_post_indices( $post->post_type ), 'slug' )
 		);
 		$exclusions  = array_values( array_intersect( $exclusions, $valid_slugs ) );
 
@@ -524,7 +508,7 @@ class PostExclusion {
 		return rest_ensure_response(
 			array(
 				'exclusions' => self::get_exclusions( $post_id ),
-				'indices'    => self::get_indices( $post->post_type ),
+				'indices'    => $this->get_post_indices( $post->post_type ),
 			)
 		);
 	}
@@ -590,7 +574,7 @@ class PostExclusion {
 
 		// Show which indices the post is excluded from.
 		$post      = get_post( $post_id );
-		$indices   = self::get_indices( $post->post_type );
+		$indices   = $this->get_post_indices( $post->post_type );
 		$labels    = array();
 
 		foreach ( $indices as $index_data ) {
@@ -768,7 +752,7 @@ class PostExclusion {
 			return;
 		}
 
-		$all_indices = self::get_indices( $post->post_type );
+		$all_indices = $this->get_post_indices( $post->post_type );
 		$all_slugs   = wp_list_pluck( $all_indices, 'slug' );
 
 		// Resolve the effective previous set of excluded slugs.
@@ -929,11 +913,8 @@ class PostExclusion {
 
 			// Filter by post type when provided.
 			if ( null !== $post_type ) {
-				$index_post_types = isset( $settings['post_types'] ) && is_array( $settings['post_types'] )
-					? $settings['post_types']
-					: array( 'post' );
-
-				if ( ! in_array( $post_type, $index_post_types, true ) ) {
+				$has_explicit_post_types = isset( $settings['post_types'] ) && is_array( $settings['post_types'] );
+				if ( $has_explicit_post_types && ! in_array( $post_type, $settings['post_types'], true ) ) {
 					continue;
 				}
 			}
@@ -1217,7 +1198,7 @@ class PostExclusion {
 			$settings   = json_decode( $index_post->post_content, true ) ?? array();
 			$configured = isset( $settings['post_types'] ) && is_array( $settings['post_types'] )
 				? $settings['post_types']
-				: array( 'post' );
+				: get_post_types( array( 'public' => true ) );
 
 			$post_types = array_merge( $post_types, $configured );
 		}
@@ -1229,5 +1210,25 @@ class PostExclusion {
 		}
 
 		return array_values( array_unique( $post_types ) );
+	}
+
+	/**
+	 * Resolve indices for a post type, with a PDF-attachment fallback.
+	 *
+	 * Some sites have legacy index settings where attachment post types were not
+	 * explicitly persisted in index JSON. For attachment screens we fall back to
+	 * all configured indices to keep exclusion controls available.
+	 *
+	 * @param string $post_type Post type slug.
+	 * @return array<array{slug:string,label:string,post_id:int}>
+	 */
+	private function get_post_indices( $post_type ) {
+		$indices = self::get_indices( $post_type );
+
+		if ( 'attachment' === $post_type && empty( $indices ) ) {
+			$indices = self::get_indices();
+		}
+
+		return $indices;
 	}
 }

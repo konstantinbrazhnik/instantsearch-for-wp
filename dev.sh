@@ -6,6 +6,7 @@
 #   ./dev.sh up         Start everything (Docker + WordPress + demo content)
 #   ./dev.sh down       Stop all containers
 #   ./dev.sh test       Run Playwright E2E tests
+#   ./dev.sh phpunit    Run PHPUnit tests inside Docker
 #   ./dev.sh screenshot Capture key plugin state screenshots → docs/media/
 #   ./dev.sh gif        Record interaction GIFs → docs/media/
 #   ./dev.sh reset      Wipe volumes and reimport fresh content
@@ -184,6 +185,87 @@ cmd_test() {
   return $exit_code
 }
 
+cmd_phpunit() {
+  load_env
+  check_deps
+
+  # If docker services are not running, start them first.
+  if ! "${DC[@]}" ps wordpress 2>/dev/null | grep -E "(healthy|running)" &>/dev/null; then
+    info "Docker services are not running. Booting test environment..."
+    cmd_up
+  fi
+
+  info "Preparing PHPUnit runner inside Docker..."
+  "${DC[@]}" run --rm --entrypoint bash wpcli -lc '
+    set -euo pipefail
+    cd /var/www/html/wp-content/plugins/instantsearch-for-wp
+    export COMPOSER_HOME="$(pwd)/.dev-tools/.composer"
+
+    mkdir -p .dev-tools
+
+    if [ ! -f .dev-tools/phpunit.phar ]; then
+      curl -fsSL https://phar.phpunit.de/phpunit-9.phar -o .dev-tools/phpunit.phar
+      chmod +x .dev-tools/phpunit.phar
+    fi
+
+    if [ ! -f .dev-tools/polyfills/vendor/autoload.php ]; then
+      mkdir -p .dev-tools/polyfills
+      mkdir -p "$COMPOSER_HOME"
+      curl -fsSL https://getcomposer.org/installer -o /tmp/composer-setup.php
+      php /tmp/composer-setup.php --install-dir=/tmp --filename=composer
+      /tmp/composer --working-dir=.dev-tools/polyfills init --name=isfwp/polyfills --require=yoast/phpunit-polyfills:^2.0 --no-interaction
+      /tmp/composer --working-dir=.dev-tools/polyfills install --no-interaction --prefer-dist
+    fi
+
+    if [ ! -f .dev-tools/wordpress-tests-lib/includes/functions.php ]; then
+      mkdir -p .dev-tools/wordpress-tests-lib
+      curl -fsSL https://github.com/WordPress/wordpress-develop/archive/refs/heads/trunk.tar.gz -o /tmp/wordpress-develop.tar.gz
+      rm -rf /tmp/wordpress-develop
+      mkdir -p /tmp/wordpress-develop
+      tar -xzf /tmp/wordpress-develop.tar.gz -C /tmp/wordpress-develop --strip-components=1
+
+      cp -R /tmp/wordpress-develop/tests/phpunit/includes .dev-tools/wordpress-tests-lib/
+      cp -R /tmp/wordpress-develop/tests/phpunit/data .dev-tools/wordpress-tests-lib/
+      cp /tmp/wordpress-develop/wp-tests-config-sample.php .dev-tools/wordpress-tests-lib/wp-tests-config.php
+
+      sed -i "s:dirname( __FILE__ ) . '/src/':'/var/www/html/':" .dev-tools/wordpress-tests-lib/wp-tests-config.php
+      sed -i "s:__DIR__ . '/src/':'/var/www/html/':" .dev-tools/wordpress-tests-lib/wp-tests-config.php
+      sed -i "s/youremptytestdbnamehere/wordpress/" .dev-tools/wordpress-tests-lib/wp-tests-config.php
+      sed -i "s/yourusernamehere/root/" .dev-tools/wordpress-tests-lib/wp-tests-config.php
+      sed -i "s/yourpasswordhere/rootpassword/" .dev-tools/wordpress-tests-lib/wp-tests-config.php
+      sed -i "s|localhost|db|" .dev-tools/wordpress-tests-lib/wp-tests-config.php
+    fi
+
+    printf "%s\n" \
+      "<?php" \
+      "define( \"ABSPATH\", \"/var/www/html/\" );" \
+      "define( \"DB_NAME\", \"wordpress\" );" \
+      "define( \"DB_USER\", \"root\" );" \
+      "define( \"DB_PASSWORD\", \"rootpassword\" );" \
+      "define( \"DB_HOST\", \"db\" );" \
+      "define( \"DB_CHARSET\", \"utf8\" );" \
+      "define( \"DB_COLLATE\", \"\" );" \
+      "\$table_prefix = \"wptests_\";" \
+      "define( \"WP_TESTS_DOMAIN\", \"example.org\" );" \
+      "define( \"WP_TESTS_EMAIL\", \"admin@example.org\" );" \
+      "define( \"WP_TESTS_TITLE\", \"Test Blog\" );" \
+      "define( \"WP_PHP_BINARY\", \"php\" );" \
+      > .dev-tools/wp-tests-config.php
+  '
+
+  info "Running PHPUnit tests in Docker..."
+  "${DC[@]}" run --rm --entrypoint bash wpcli -lc "
+    set -euo pipefail
+    cd /var/www/html/wp-content/plugins/instantsearch-for-wp
+    export WP_TESTS_DIR=\"\$(pwd)/.dev-tools/wordpress-tests-lib\"
+    export WP_TESTS_PHPUNIT_POLYFILLS_PATH=\"\$(pwd)/.dev-tools/polyfills/vendor/yoast/phpunit-polyfills\"
+    export WP_TESTS_CONFIG_FILE_PATH=\"\$(pwd)/.dev-tools/wp-tests-config.php\"
+    php .dev-tools/phpunit.phar --configuration phpunit.xml.dist $*
+  "
+
+  success "PHPUnit run complete."
+}
+
 cmd_screenshot() {
   load_env
   check_deps
@@ -284,6 +366,7 @@ cmd_help() {
   echo -e "  ${GREEN}up${NC}           Start everything (Docker + WordPress + demo content)"
   echo -e "  ${GREEN}down${NC}         Stop all containers"
   echo -e "  ${GREEN}test${NC}         Run Playwright E2E tests"
+  echo -e "  ${GREEN}phpunit${NC}      Run PHPUnit tests inside Docker"
   echo -e "  ${GREEN}screenshot${NC}   Capture key plugin state screenshots → docs/media/"
   echo -e "  ${GREEN}gif${NC}          Record interaction GIFs → docs/media/"
   echo -e "  ${GREEN}reset${NC}        Wipe volumes and reimport fresh demo content"
@@ -298,6 +381,7 @@ cmd_help() {
   echo -e "${BOLD}Examples:${NC}"
   echo -e "  ./dev.sh up"
   echo -e "  ./dev.sh test"
+  echo -e "  ./dev.sh phpunit --filter PostExclusionAttachmentTest"
   echo -e "  ./dev.sh screenshot && ./dev.sh gif"
   echo -e "  ./dev.sh wpcli option get instantsearch_for_wp_settings"
   echo -e "  ./dev.sh reset"
@@ -317,6 +401,7 @@ case "$COMMAND" in
   up)         cmd_up "$@" ;;
   down)       cmd_down "$@" ;;
   test)       cmd_test "$@" ;;
+  phpunit)    cmd_phpunit "$@" ;;
   screenshot) cmd_screenshot "$@" ;;
   gif)        cmd_gif "$@" ;;
   reset)      cmd_reset "$@" ;;
