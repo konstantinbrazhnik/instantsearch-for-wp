@@ -59,6 +59,11 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E Playwright Tests
+    env:
+      SEARCH_PROVIDER: algolia
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_SEARCH_ONLY_API_KEY: ${{ secrets.ALGOLIA_SEARCH_ONLY_API_KEY }}
+      ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
