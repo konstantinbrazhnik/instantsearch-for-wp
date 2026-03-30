@@ -37,6 +37,8 @@ class Initializer {
 		Cli\InstantSearchCommand::register();
 
 		new Settings();
+		new Blocks();
+
 		// Initialize admin interface.
 		if ( is_admin() ) {
 			new Admin();
