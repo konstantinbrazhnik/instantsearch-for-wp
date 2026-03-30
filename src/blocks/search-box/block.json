@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/search-box",
+	"version": "1.0.0",
+	"title": "Search Box",
+	"description": "An InstantSearch text input for entering search queries.",
+	"category": "instantsearch-for-wp",
+	"icon": "search",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "search", "input", "query", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"attributes": {
+		"metadata": { "type": "object" },
+		"placeholder": { "type": "string", "default": "Search…" },
+		"autofocus": { "type": "boolean", "default": false },
+		"showSubmit": { "type": "boolean", "default": true },
+		"showReset": { "type": "boolean", "default": true }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}
