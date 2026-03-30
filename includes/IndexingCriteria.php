@@ -23,42 +23,48 @@ class IndexingCriteria {
 	 * @return void
 	 */
 	public function __construct() {
-		add_filter( 'instantsearch_should_index_post', array( $this, 'indexing_post_type' ), 20, 3 );
-		add_filter( 'instantsearch_should_index_post', array( $this, 'indexing_post_status' ), 20, 3 );
-		add_filter( 'instantsearch_should_index_post', array( $this, 'indexing_post_password' ), 20, 3 );
-		add_filter( 'instantsearch_should_index_post', array( $this, 'omitted_from_index' ), 20, 3 );
+		// Accept 5 arguments: $should_index, $post_id, $post, $update, $index.
+		add_filter( 'instantsearch_should_index_post', array( $this, 'indexing_post_type' ), 20, 5 );
+		add_filter( 'instantsearch_should_index_post', array( $this, 'indexing_post_status' ), 20, 5 );
+		add_filter( 'instantsearch_should_index_post', array( $this, 'indexing_post_password' ), 20, 5 );
+		add_filter( 'instantsearch_should_index_post', array( $this, 'omitted_from_index' ), 20, 5 );
+
+		// Per-index exclusion via the `instantsearch_exclude_post` filter.
+		add_filter( 'instantsearch_exclude_post', array( $this, 'check_exclusion_meta' ), 10, 4 );
 	}
 
 	/**
 	 * Determine if a post should be indexed based on its type and status.
 	 *
-	 * @param bool|null $should_index Whether the post should be indexed. Null means undecided.
-	 * @param int       $post_id      The ID of the post to check.
-	 * @param \WP_Post  $post         The post object.
+	 * @param bool|null  $should_index Whether the post should be indexed. Null means undecided.
+	 * @param int        $post_id      The ID of the post to check.
+	 * @param \WP_Post   $post         The post object.
+	 * @param bool       $update       Whether this is an update to an existing post.
+	 * @param Index|null $index        The Index object being indexed into, or null for global context.
 	 *
 	 * @return bool|null True if the post should be indexed, false if it should not, null if undecided.
 	 */
-	public function indexing_post_type( $should_index, $post_id, $post ) {
+	public function indexing_post_type( $should_index, $post_id, $post, $update = false, $index = null ) {
 		if ( null !== $should_index ) {
 			return $should_index;
 		}
 
 		$indexes = Settings::get_settings( 'indexes' );
 		if ( is_array( $indexes ) && ! empty( $indexes ) ) {
-			$index = null;
+			$settings_index = null;
 
 			if ( isset( $indexes['post_types'] ) ) {
-				$index = $indexes;
+				$settings_index = $indexes;
 			} else {
 				$indexes_values = array_values( $indexes );
 				$first_index    = isset( $indexes_values[0] ) ? $indexes_values[0] : null;
 				if ( is_array( $first_index ) ) {
-					$index = $first_index;
+					$settings_index = $first_index;
 				}
 			}
 
-			if ( is_array( $index ) && isset( $index['post_types'] ) && is_array( $index['post_types'] ) ) {
-				if ( in_array( $post->post_type, $index['post_types'], true ) ) {
+			if ( is_array( $settings_index ) && isset( $settings_index['post_types'] ) && is_array( $settings_index['post_types'] ) ) {
+				if ( in_array( $post->post_type, $settings_index['post_types'], true ) ) {
 					return $should_index;
 				}
 
@@ -81,13 +87,15 @@ class IndexingCriteria {
 	/**
 	 * Determine if a post should be indexed based on its status.
 	 *
-	 * @param bool|null $should_index Whether the post should be indexed. Null means undecided.
-	 * @param int       $post_id      The ID of the post to check.
-	 * @param \WP_Post  $post         The post object.
+	 * @param bool|null  $should_index Whether the post should be indexed. Null means undecided.
+	 * @param int        $post_id      The ID of the post to check.
+	 * @param \WP_Post   $post         The post object.
+	 * @param bool       $update       Whether this is an update to an existing post.
+	 * @param Index|null $index        The Index object being indexed into, or null for global context.
 	 *
 	 * @return bool|null True if the post should be indexed, false if it should not, null if undecided.
 	 */
-	public function indexing_post_status( $should_index, $post_id, $post ) {
+	public function indexing_post_status( $should_index, $post_id, $post, $update = false, $index = null ) {
 		if ( null !== $should_index ) {
 			return $should_index;
 		}
@@ -109,13 +117,15 @@ class IndexingCriteria {
 	/**
 	 * Determine if a post should be indexed based on whether it is password protected.
 	 *
-	 * @param bool|null $should_index Whether the post should not be indexed. Null means undecided.
-	 * @param int       $post_id      The ID of the post to check.
-	 * @param \WP_Post  $post         The post object.
+	 * @param bool|null  $should_index Whether the post should not be indexed. Null means undecided.
+	 * @param int        $post_id      The ID of the post to check.
+	 * @param \WP_Post   $post         The post object.
+	 * @param bool       $update       Whether this is an update to an existing post.
+	 * @param Index|null $index        The Index object being indexed into, or null for global context.
 	 *
 	 * @return bool|null True if the post should be indexed, false if it should not, null if undecided.
 	 */
-	public function indexing_post_password( $should_index, $post_id, $post ) {
+	public function indexing_post_password( $should_index, $post_id, $post, $update = false, $index = null ) {
 		if ( null !== $should_index ) {
 			return $should_index;
 		}
@@ -131,24 +141,76 @@ class IndexingCriteria {
 	/**
 	 * Determine if a post should be indexed based on a custom field indicating omission from index.
 	 *
-	 * @param bool|null $should_index Whether the post should not be indexed. Null means undecided.
-	 * @param int       $post_id      The ID of the post to check.
-	 * @param \WP_Post  $post         The post object.
+	 * Checks the legacy `_instantsearch_omit_from_index` meta key for backward compatibility.
+	 * Per-index exclusion via `_instantsearch_exclude` is handled by `check_exclusion_meta()`.
+	 *
+	 * @param bool|null  $should_index Whether the post should not be indexed. Null means undecided.
+	 * @param int        $post_id      The ID of the post to check.
+	 * @param \WP_Post   $post         The post object.
+	 * @param bool       $update       Whether this is an update to an existing post.
+	 * @param Index|null $index        The Index object being indexed into, or null for global context.
 	 *
 	 * @return bool|null True if the post should be indexed, false if it should not, null if undecided.
 	 */
-	public function omitted_from_index( $should_index, $post_id, $post ) {
+	public function omitted_from_index( $should_index, $post_id, $post, $update = false, $index = null ) {
 		if ( null !== $should_index ) {
 			return $should_index;
 		}
 
 		$omitted = get_post_meta( $post_id, '_instantsearch_omit_from_index', true );
 		if ( $omitted ) {
-			// Posts marked with the custom field should not be indexed.
+			// Posts marked with the legacy custom field should not be indexed.
+			return false;
+		}
+
+		// When there is no specific index context (e.g. on save_post before
+		// per-index processing), check if the post is globally excluded from
+		// every index via the __all__ sentinel.
+		if ( null === $index && PostExclusion::is_excluded( $post_id, null ) ) {
 			return false;
 		}
 
 		return $should_index;
+	}
+
+	/**
+	 * Handle the `instantsearch_exclude_post` filter for per-index exclusion.
+	 *
+	 * Called during `index_or_delete_posts()` when a specific Index object is
+	 * available.  Returns true if the post should be excluded from that index.
+	 *
+	 * Checks `_instantsearch_exclude` post meta which stores an array of index
+	 * slugs.  The special sentinel value `__all__` excludes the post from every
+	 * index.
+	 *
+	 * Example usage of the filter from external code:
+	 *
+	 *   add_filter(
+	 *       'instantsearch_exclude_post',
+	 *       function( $exclude, $post_id, $post, $index ) {
+	 *           // Exclude sticky posts from the "products" index.
+	 *           if ( $index->index_post->post_name === 'products' && is_sticky( $post_id ) ) {
+	 *               return true;
+	 *           }
+	 *           return $exclude;
+	 *       },
+	 *       10,
+	 *       4
+	 *   );
+	 *
+	 * @param bool       $exclude  Current exclude flag.
+	 * @param int        $post_id  Post ID.
+	 * @param \WP_Post   $post     Post object.
+	 * @param Index|null $index    Index object being indexed into.
+	 *
+	 * @return bool True if the post should be excluded from this index.
+	 */
+	public function check_exclusion_meta( $exclude, $post_id, $post, $index = null ) {
+		if ( $exclude ) {
+			return $exclude;
+		}
+
+		return PostExclusion::is_excluded( $post_id, $index );
 	}
 
 	/**

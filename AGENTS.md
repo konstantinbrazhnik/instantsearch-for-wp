@@ -103,6 +103,14 @@ npm run typesense:mac
 
 ## Code Standards & Guidelines
 
+## Additional AI Agent Instructions
+
+- **Internationalization (required)**: Use WordPress best-practice internationalization helpers for all user-facing text.
+- **PHP i18n functions**: Prefer `__()`, `_x()`, `_n()`, `_nx()`, `esc_html__()`, `esc_attr__()`, `esc_html_e()`, and `esc_attr_e()` based on output context.
+- **JavaScript i18n functions**: Use `__()`, `_x()`, and `_n()` from `@wordpress/i18n` for all translatable UI strings.
+- **Text domain consistency**: Use the plugin text domain (`yoko-core`) consistently for translatable strings.
+- **Admin/metabox naming**: Any metabox, settings section, admin panel, tab, or heading integrated into WordPress admin must use a clear `InstantSearch` prefix in the title/header. Do not use generic `Search`-only titles.
+
 ### PHP Development
 - **Standards**: WordPress PHP Coding Standards (enforced by PHPCS)
 - **Security**: Always sanitize input and escape output
@@ -161,10 +169,31 @@ export default function Edit() {
 
 ## Testing Guidelines
 
+### Docker WP-CLI Requirement
+
+- Run WP-CLI commands only inside the Docker test environment created for e2e.
+- Do not run host-machine WP-CLI against Local or production installs.
+- Preferred command:
+    - `./dev.sh wpcli <command> ...`
+- Equivalent direct compose command:
+    - `docker compose -f dev/docker-compose.yml run --rm wpcli <command> ...`
+
+### Scenario Coverage Requirement
+
+- For every user-facing scenario change, add a testable scenario for both:
+    - Backend behavior (data/state/API/WP-CLI assertions)
+    - Frontend or wp-admin behavior (Playwright e2e assertion)
+- If the scenario touches exclusions/indexing visibility in admin, include:
+    - One backend assertion that index/exclusion state is resolved correctly
+    - One UI assertion that editors can see and use the related controls
+
 ### PHP Testing
 ```bash
-# Run PHP tests
-composer test
+# Run PHPUnit tests in Docker test environment
+./dev.sh phpunit
+
+# Run a specific test/class
+./dev.sh phpunit --filter PostExclusionAttachmentTest
 
 # Run with coverage
 phpunit --coverage-html coverage/

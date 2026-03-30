@@ -162,10 +162,31 @@ export default function Edit() {
 
 ## Testing Guidelines
 
+### Docker WP-CLI Requirement
+
+- Run WP-CLI commands only inside the Docker test environment created for e2e.
+- Do not run host-machine WP-CLI against Local or production installs.
+- Preferred command:
+    - `./dev.sh wpcli <command> ...`
+- Equivalent direct compose command:
+    - `docker compose -f dev/docker-compose.yml run --rm wpcli <command> ...`
+
+### Scenario Coverage Requirement
+
+- For every user-facing scenario change, add a testable scenario for both:
+    - Backend behavior (data/state/API/WP-CLI assertions)
+    - Frontend or wp-admin behavior (Playwright e2e assertion)
+- If the scenario touches exclusions/indexing visibility in admin, include:
+    - One backend assertion that index/exclusion state is resolved correctly
+    - One UI assertion that editors can see and use the related controls
+
 ### PHP Testing
 ```bash
-# Run PHP tests
-composer test
+# Run PHPUnit tests in Docker test environment
+./dev.sh phpunit
+
+# Run a specific test/class
+./dev.sh phpunit --filter PostExclusionAttachmentTest
 
 # Run with coverage
 phpunit --coverage-html coverage/

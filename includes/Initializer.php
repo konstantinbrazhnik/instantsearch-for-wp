@@ -32,6 +32,7 @@ class Initializer {
 		Index::init();
 		Indexer::get_instance();
 		new IndexingCriteria();
+		new PostExclusion();
 		PDFTextExtractor::get_instance();
 		Cli\InstantSearchCommand::register();
 
