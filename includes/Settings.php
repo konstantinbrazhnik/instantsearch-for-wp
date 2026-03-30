@@ -104,7 +104,7 @@ class Settings {
 	 */
 	public static function get_index_name( string $index_name = null ) {
 
-		if ( null === $index_name ) {
+		if ( null === $index_name || true === $index_name || "1" === $index_name ) {
 			$index = new Index();
 
 			if ( $index->name ) {
@@ -144,13 +144,8 @@ class Settings {
 		// Filter out any post types that should not be indexed.
 		$public_post_types = apply_filters( 'instantsearch_for_wp_default_indexable_post_types', $public_post_types );
 
-		return array(
+		$default_settings = array(
 			'provider'            => '',
-			'algolia'             => array(
-				'app_id'              => '',
-				'search_only_api_key' => '',
-				'admin_api_key'       => '',
-			),
 			'use_as_sitesearch'   => false,
 			'sitesearch_settings' => array(
 				'placeholder_text' => __( 'Search...', 'instantsearch-for-wp' ),
@@ -158,6 +153,11 @@ class Settings {
 				'snippet_length'   => 50,
 			),
 		);
+
+		// Filter the default settings.
+		$default_settings = apply_filters( 'instantsearch_for_wp_default_settings', $default_settings );
+
+		return $default_settings;
 	}
 
 	/**
@@ -174,24 +174,7 @@ class Settings {
 			'properties' => array(
 				'provider' => array(
 					'type' => 'string',
-					'enum' => array(
-						'algolia',
-						'typesense',
-					),
-				),
-				'algolia' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'app_id'  => array(
-							'type' => 'string',
-						),
-						'search_only_api_key' => array(
-							'type' => 'string',
-						),
-						'admin_api_key' => array(
-							'type' => 'string',
-						),
-					),
+					'enum' => array(),
 				),
 				// Whethet to use an index for site search.
 				// Either a boolean or the name of the index to use.
@@ -216,8 +199,7 @@ class Settings {
 			),
 		);
 
-		// Filter the default settings.
-		$default = apply_filters( 'instantsearch_for_wp_default_settings', $default );
+		$schema = apply_filters( 'instantsearch_for_wp_settings_schema', $schema );
 
 		register_setting(
 			'options',

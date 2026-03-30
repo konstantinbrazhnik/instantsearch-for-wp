@@ -14,6 +14,7 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 	} = useAdminContext();
 	
 	const [useSearchSettings, setUseSearchSettings] = useState({
+		algolia: settings?.algolia || {},
 		use_as_sitesearch: settings?.use_as_sitesearch || false,
 		sitesearch_settings: settings?.sitesearch_settings || {}
 	});
@@ -27,9 +28,9 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 		<>
 			<h3>{__('Search Configuration', 'instantsearch-for-wp')}</h3>
 			<ToggleControl
-				label={__('Enable this index and Instant Search for WP site search.', 'instantsearch-for-wp')}
-				checked={useSearchSettings?.use_as_sitesearch === indexCpt?.slug}
-				onChange={(value) => setUseSearchSettings((prev) => ({ ...prev, use_as_sitesearch: value ? indexCpt?.slug : false }))}
+				label={__('Enable Instant Search for WP site search.', 'instantsearch-for-wp')}
+				checked={useSearchSettings?.use_as_sitesearch}
+				onChange={(value) => setUseSearchSettings((prev) => ({ ...prev, use_as_sitesearch: value ? true : false }))}
 			/>
 			{
 				useSearchSettings?.use_as_sitesearch && (
@@ -84,6 +85,18 @@ const SearchConfiguration = ({ index, indexCpt }) => {
 								sitesearch_settings: {
 									...prev.sitesearch_settings,
 									sidebar_position: value,
+								}
+							}))}
+						/>
+						<ToggleControl
+							help={__('Free Algolia accounts are required to show the Powered by Algolia badge. You can hide it if you have a paid account.', 'instantsearch-for-wp')}
+							label={__('Hide Powered by Algolia Badge', 'instantsearch-for-wp')}
+							checked={useSearchSettings?.algolia?.hide_algolia_badge || false}
+							onChange={(value) => setUseSearchSettings((prev) => ({
+								...prev,
+								algolia: {
+									...prev.algolia,
+									hide_algolia_badge: value,
 								}
 							}))}
 						/>

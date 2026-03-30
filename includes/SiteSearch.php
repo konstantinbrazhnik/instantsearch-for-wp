@@ -58,6 +58,7 @@ class SiteSearch {
 			<div class="isfwp-site-search-header">
 				<div class="isfwp-site-search-container">
 					<div id="isfwp-site-search-input"></div>
+					<div id="isfwp-powered-by-algolia"></div>
 				</div>
 			</div>
 			<div class="isfwp-site-search-main">
@@ -92,8 +93,6 @@ class SiteSearch {
 		return apply_filters(
 			'instantsearch_for_wp_instantsearch_config',
 			array(
-				'appId'                       => $settings['algolia']['app_id'] ?? '',
-				'apiKey'                      => $settings['algolia']['search_only_api_key'] ?? '',
 				'indexName'                   => Settings::get_index_name( $settings['use_as_sitesearch'] ),
 				'facetTitles'                 => array_merge(
 					array(
