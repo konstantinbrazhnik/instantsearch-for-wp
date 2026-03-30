@@ -58,6 +58,8 @@ class PostExclusion {
 
 		// Classic Editor meta box.
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
+		add_action( 'add_meta_boxes_attachment', array( $this, 'add_attachment_meta_box' ) );
+		add_action( 'attachment_submitbox_misc_actions', array( $this, 'render_attachment_submitbox_controls' ) );
 		// Save handler runs before the Indexer (priority 5 < 10).
 		add_action( 'save_post', array( $this, 'save_meta_box' ), 5, 2 );
 
@@ -126,15 +128,75 @@ class PostExclusion {
 		$applicable_post_types = $this->get_applicable_post_types();
 
 		foreach ( $applicable_post_types as $post_type ) {
+			// Attachments use a dedicated hook so we can limit this UI to PDFs only.
+			if ( 'attachment' === $post_type ) {
+				continue;
+			}
+
 			add_meta_box(
 				'instantsearch_exclusion',
-				__( 'Search Index', 'instantsearch-for-wp' ),
+				__( 'InstantSearch Index', 'instantsearch-for-wp' ),
 				array( $this, 'render_meta_box' ),
 				$post_type,
 				'side',
 				'default'
 			);
 		}
+	}
+
+	/**
+	 * Register the exclusion meta box for PDF attachments.
+	 *
+	 * Attachment indexing in this plugin is PDF-only, so this UI is
+	 * intentionally shown only for PDF media items.
+	 *
+	 * @param \WP_Post $post Current attachment post object.
+	 * @return void
+	 */
+	public function add_attachment_meta_box( $post ) {
+		if ( ! ( $post instanceof \WP_Post ) ) {
+			return;
+		}
+
+		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
+			return;
+		}
+
+		add_meta_box(
+			'instantsearch_exclusion',
+			__( 'InstantSearch Index', 'instantsearch-for-wp' ),
+			array( $this, 'render_meta_box' ),
+			'attachment',
+			'side',
+			'default'
+		);
+	}
+
+	/**
+	 * Render exclusion controls in the attachment submit box as a fallback.
+	 *
+	 * Some media edit flows do not surface custom metaboxes consistently.
+	 * This ensures the controls remain visible for PDF attachments.
+	 *
+	 * @param \WP_Post $post Current attachment post object.
+	 * @return void
+	 */
+	public function render_attachment_submitbox_controls( $post ) {
+		if ( ! ( $post instanceof \WP_Post ) ) {
+			return;
+		}
+
+		if ( 'attachment' !== $post->post_type ) {
+			return;
+		}
+
+		if ( 'application/pdf' !== get_post_mime_type( $post->ID ) ) {
+			return;
+		}
+
+		echo '<div class="misc-pub-section instantsearch-attachment-controls">';
+		$this->render_meta_box( $post );
+		echo '</div>';
 	}
 
 	/**
@@ -148,6 +210,7 @@ class PostExclusion {
 
 		$exclusions = self::get_exclusions( $post->ID );
 		$indices    = self::get_indices( $post->post_type );
+		$status     = $this->get_index_status_data( $post, $indices, $exclusions );
 
 		if ( empty( $indices ) ) {
 			echo '<p>' . esc_html__( 'No search indices are configured for this post type.', 'instantsearch-for-wp' ) . '</p>';
@@ -204,6 +267,30 @@ class PostExclusion {
 							);
 							?>
 						</label>
+					</p>
+				<?php endforeach; ?>
+			<?php endif; ?>
+
+			<hr />
+			<p><strong><?php esc_html_e( 'InstantSearch Status', 'instantsearch-for-wp' ); ?></strong></p>
+			<p>
+				<strong><?php esc_html_e( 'Status:', 'instantsearch-for-wp' ); ?></strong>
+				<?php echo esc_html( $status['summary'] ); ?>
+			</p>
+
+			<?php if ( ! empty( $status['rows'] ) ) : ?>
+				<?php foreach ( $status['rows'] as $row ) : ?>
+					<p style="margin:0 0 8px;">
+						<strong><?php echo esc_html( $row['label'] ); ?></strong>
+						<code style="font-size:10px;">(<?php echo esc_html( $row['slug'] ); ?>)</code>
+						<br />
+						<?php echo esc_html( $row['status'] ); ?>
+						<br />
+						<?php if ( ! empty( $row['view_url'] ) ) : ?>
+							<a class="button button-small" href="<?php echo esc_url( $row['view_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View in Index', 'instantsearch-for-wp' ); ?></a>
+						<?php else : ?>
+							<button type="button" class="button button-small" disabled><?php echo esc_html( $row['view_label'] ); ?></button>
+						<?php endif; ?>
 					</p>
 				<?php endforeach; ?>
 			<?php endif; ?>
@@ -867,6 +954,227 @@ class PostExclusion {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Build provider-aware status data for the metabox.
+	 *
+	 * @param \WP_Post $post       Current post object.
+	 * @param array    $indices    Applicable indices.
+	 * @param array    $exclusions Exclusion slugs for this post.
+	 * @return array{summary:string,rows:array<int,array{label:string,slug:string,status:string,view_url:string,view_label:string}>}
+	 */
+	private function get_index_status_data( $post, $indices, $exclusions ) {
+		$provider         = $this->get_provider_slug();
+		$exclude_all      = in_array( self::EXCLUDE_ALL, $exclusions, true );
+		$included_count   = 0;
+		$indexed_count    = 0;
+		$unknown_count    = 0;
+		$rows             = array();
+
+		$algolia_app_id = '';
+		$algolia_client = null;
+		if ( 'algolia' === $provider ) {
+			$algolia_creds  = $this->get_algolia_credentials();
+			$algolia_app_id = $algolia_creds['app_id'];
+			$algolia_client = $this->get_algolia_client( $algolia_creds['app_id'], $algolia_creds['admin_api_key'] );
+		}
+
+		foreach ( $indices as $index_data ) {
+			$slug       = $index_data['slug'];
+			$label      = $index_data['label'];
+			$is_excluded = $exclude_all || in_array( $slug, $exclusions, true );
+			$index_name = Settings::get_index_name( $slug );
+
+			$status_label = __( 'Excluded from this index.', 'instantsearch-for-wp' );
+			$view_url     = '';
+			$view_label   = __( 'View in Index not available', 'instantsearch-for-wp' );
+
+			if ( ! $is_excluded ) {
+				++$included_count;
+
+				if ( 'algolia' === $provider ) {
+					$is_indexed = $this->is_post_indexed_in_algolia( $algolia_client, $index_name, $post->ID );
+
+					if ( true === $is_indexed ) {
+						$status_label = __( 'Indexed', 'instantsearch-for-wp' );
+						++$indexed_count;
+					} elseif ( false === $is_indexed ) {
+						$status_label = __( 'Not indexed', 'instantsearch-for-wp' );
+					} else {
+						$status_label = __( 'Index status unavailable', 'instantsearch-for-wp' );
+						++$unknown_count;
+					}
+
+					if ( ! empty( $algolia_app_id ) && ! empty( $index_name ) ) {
+						$view_url = $this->get_algolia_dashboard_url( $algolia_app_id, $index_name, $post->ID );
+					}
+
+					if ( empty( $view_url ) ) {
+						$view_label = __( 'View in Index unavailable (missing Algolia app ID)', 'instantsearch-for-wp' );
+					}
+				} elseif ( 'typesense' === $provider ) {
+					$status_label = __( 'Status check for Typesense is coming soon.', 'instantsearch-for-wp' );
+					$view_label   = __( 'View in Index (Typesense coming soon)', 'instantsearch-for-wp' );
+				} else {
+					$status_label = __( 'Provider not configured.', 'instantsearch-for-wp' );
+					$view_label   = __( 'View in Index unavailable', 'instantsearch-for-wp' );
+				}
+			}
+
+			$rows[] = array(
+				'label'      => $label,
+				'slug'       => $slug,
+				'status'     => $status_label,
+				'view_url'   => $view_url,
+				'view_label' => $view_label,
+			);
+		}
+
+		if ( 0 === $included_count ) {
+			$summary = __( 'Excluded from all indices.', 'instantsearch-for-wp' );
+		} elseif ( 'algolia' === $provider ) {
+			if ( $indexed_count === $included_count ) {
+				$summary = __( 'Indexed in all included indices.', 'instantsearch-for-wp' );
+			} elseif ( $indexed_count > 0 ) {
+				$summary = sprintf(
+					/* translators: 1: indexed index count, 2: included index count */
+					__( 'Partially indexed (%1$d of %2$d included indices).', 'instantsearch-for-wp' ),
+					$indexed_count,
+					$included_count
+				);
+			} elseif ( $unknown_count > 0 ) {
+				$summary = __( 'Index status unavailable (could not verify with Algolia).', 'instantsearch-for-wp' );
+			} else {
+				$summary = __( 'Not indexed in included indices.', 'instantsearch-for-wp' );
+			}
+		} elseif ( 'typesense' === $provider ) {
+			$summary = __( 'Status check for Typesense is coming soon.', 'instantsearch-for-wp' );
+		} else {
+			$summary = __( 'Provider not configured.', 'instantsearch-for-wp' );
+		}
+
+		return array(
+			'summary' => $summary,
+			'rows'    => $rows,
+		);
+	}
+
+	/**
+	 * Get configured provider slug.
+	 *
+	 * @return string
+	 */
+	private function get_provider_slug() {
+		$provider = Settings::get_settings( 'provider' );
+		if ( ! is_string( $provider ) ) {
+			return '';
+		}
+
+		return sanitize_key( $provider );
+	}
+
+	/**
+	 * Resolve Algolia credentials from settings and constants.
+	 *
+	 * @return array{app_id:string,admin_api_key:string}
+	 */
+	private function get_algolia_credentials() {
+		$app_id        = '';
+		$admin_api_key = '';
+
+		$algolia_settings = Settings::get_settings( 'algolia' );
+		if ( is_array( $algolia_settings ) ) {
+			$app_id        = isset( $algolia_settings['app_id'] ) ? (string) $algolia_settings['app_id'] : '';
+			$admin_api_key = isset( $algolia_settings['admin_api_key'] ) ? (string) $algolia_settings['admin_api_key'] : '';
+		}
+
+		if ( defined( 'ALGOLIA_APP_ID' ) && ALGOLIA_APP_ID ) {
+			$app_id = (string) ALGOLIA_APP_ID;
+		}
+
+		if ( defined( 'ALGOLIA_API_KEY' ) && ALGOLIA_API_KEY ) {
+			$admin_api_key = (string) ALGOLIA_API_KEY;
+		}
+
+		return array(
+			'app_id'        => $app_id,
+			'admin_api_key' => $admin_api_key,
+		);
+	}
+
+	/**
+	 * Create an Algolia client when credentials are available.
+	 *
+	 * @param string $app_id        Algolia app ID.
+	 * @param string $admin_api_key Algolia admin API key.
+	 * @return mixed
+	 */
+	private function get_algolia_client( $app_id, $admin_api_key ) {
+		if ( empty( $app_id ) || empty( $admin_api_key ) ) {
+			return null;
+		}
+
+		if ( ! class_exists( '\\Algolia\\AlgoliaSearch\\Api\\SearchClient' ) ) {
+			return null;
+		}
+
+		try {
+			return \Algolia\AlgoliaSearch\Api\SearchClient::create( $app_id, $admin_api_key );
+		} catch ( \Throwable $exception ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Check whether the post currently exists in a given Algolia index.
+	 *
+	 * @param mixed  $client     Algolia client instance.
+	 * @param string $index_name Provider index name.
+	 * @param int    $post_id    Post ID.
+	 * @return bool|null True when indexed, false when not indexed, null when unknown.
+	 */
+	private function is_post_indexed_in_algolia( $client, $index_name, $post_id ) {
+		if ( empty( $client ) || empty( $index_name ) ) {
+			return null;
+		}
+
+		try {
+			$results = $client->browse(
+				$index_name,
+				array(
+					'attributesToRetrieve' => array( 'objectID' ),
+					'filters'              => 'postID:' . absint( $post_id ),
+					'hitsPerPage'          => 1,
+				)
+			);
+
+			return ! empty( $results['hits'] );
+		} catch ( \Throwable $exception ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Build Algolia dashboard explorer URL for a specific index/post filter.
+	 *
+	 * @param string $app_id     Algolia app ID.
+	 * @param string $index_name Provider index name.
+	 * @param int    $post_id    Post ID.
+	 * @return string
+	 */
+	private function get_algolia_dashboard_url( $app_id, $index_name, $post_id ) {
+		if ( empty( $app_id ) || empty( $index_name ) ) {
+			return '';
+		}
+
+		return sprintf(
+			'https://dashboard.algolia.com/apps/%1$s/explorer/browse/%2$s?%3$s=%4$d&searchMode=search',
+			rawurlencode( $app_id ),
+			rawurlencode( $index_name ),
+			rawurlencode( 'refinementList[postID][]' ),
+			absint( $post_id )
+		);
 	}
 
 	// -------------------------------------------------------------------------

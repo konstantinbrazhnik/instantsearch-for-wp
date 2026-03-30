@@ -103,6 +103,14 @@ npm run typesense:mac
 
 ## Code Standards & Guidelines
 
+## Additional AI Agent Instructions
+
+- **Internationalization (required)**: Use WordPress best-practice internationalization helpers for all user-facing text.
+- **PHP i18n functions**: Prefer `__()`, `_x()`, `_n()`, `_nx()`, `esc_html__()`, `esc_attr__()`, `esc_html_e()`, and `esc_attr_e()` based on output context.
+- **JavaScript i18n functions**: Use `__()`, `_x()`, and `_n()` from `@wordpress/i18n` for all translatable UI strings.
+- **Text domain consistency**: Use the plugin text domain (`yoko-core`) consistently for translatable strings.
+- **Admin/metabox naming**: Any metabox, settings section, admin panel, tab, or heading integrated into WordPress admin must use a clear `InstantSearch` prefix in the title/header. Do not use generic `Search`-only titles.
+
 ### PHP Development
 - **Standards**: WordPress PHP Coding Standards (enforced by PHPCS)
 - **Security**: Always sanitize input and escape output
