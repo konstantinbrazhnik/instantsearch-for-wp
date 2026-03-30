@@ -39,6 +39,7 @@ class Initializer {
 		// Initialize admin interface.
 		if ( is_admin() ) {
 			new Admin();
+			new PostMetaBox();
 		} else {
 			new SiteSearch();
 			new Integrations();

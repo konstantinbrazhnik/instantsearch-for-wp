@@ -114,6 +114,60 @@ class Index {
 	}
 
 	/**
+	 * Cache of Index instances keyed by CPT post ID.
+	 *
+	 * @var Index[]|null
+	 */
+	private static ?array $all_indexes_cache = null;
+
+	/**
+	 * Get all configured indexes.
+	 *
+	 * Results are cached in a static property for the duration of the request
+	 * to avoid repeated database queries.
+	 *
+	 * @return Index[] Array of Index instances for all published isfwp_index posts.
+	 */
+	public static function get_all_indexes() {
+		if ( null !== self::$all_indexes_cache ) {
+			return self::$all_indexes_cache;
+		}
+
+		$index_posts = get_posts(
+			array(
+				'post_type'      => self::$cpt_slug,
+				'posts_per_page' => -1,
+				'post_status'    => 'publish',
+			)
+		);
+
+		self::$all_indexes_cache = array_map(
+			function ( $index_post ) {
+				return new self( $index_post->ID );
+			},
+			$index_posts
+		);
+
+		return self::$all_indexes_cache;
+	}
+
+	/**
+	 * Check if a post type is included in at least one configured index.
+	 *
+	 * @param string $post_type The post type slug to check.
+	 * @return bool True if the post type is in at least one index.
+	 */
+	public static function is_post_type_indexed( $post_type ) {
+		foreach ( self::get_all_indexes() as $index ) {
+			$post_types = $index->index_settings['post_types'] ?? array();
+			if ( in_array( $post_type, (array) $post_types, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Retrieve posts for indexing based on index settings.
 	 *
 	 * @param int $number Number of posts to retrieve.

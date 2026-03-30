@@ -162,25 +162,6 @@ class IndexingCriteria {
 			return false;
 		}
 
-		$indexes = Settings::get_settings( 'indexes' );
-		if ( ! is_array( $indexes ) || empty( $indexes ) ) {
-			return false;
-		}
-
-		$index = null;
-		if ( isset( $indexes['post_types'] ) ) {
-			$index = $indexes;
-		} else {
-			$indexes_values = array_values( $indexes );
-			$first_index    = isset( $indexes_values[0] ) ? $indexes_values[0] : null;
-			if ( is_array( $first_index ) ) {
-				$index = $first_index;
-			}
-		}
-
-		return is_array( $index )
-			&& isset( $index['post_types'] )
-			&& is_array( $index['post_types'] )
-			&& in_array( 'attachment', $index['post_types'], true );
+		return Index::is_post_type_indexed( 'attachment' );
 	}
 }
