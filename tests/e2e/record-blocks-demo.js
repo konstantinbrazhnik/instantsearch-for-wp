@@ -24,11 +24,11 @@ async function sleep( ms ) {
 }
 
 async function loginAsAdmin( page ) {
-	await page.goto( `${ BASE_URL }/wp-login.php`, { waitUntil: 'networkidle' } );
+	await page.goto( `${ BASE_URL }/wp-login.php`, { waitUntil: 'load' } );
 	await page.fill( '#user_login', 'admin' );
 	await page.fill( '#user_pass', 'admin' );
 	await page.click( '#wp-submit' );
-	await page.waitForURL( /wp-admin/, { timeout: 15_000 } );
+	await page.waitForURL( /wp-admin/, { timeout: 30_000 } );
 	await sleep( 800 );
 }
 
@@ -54,18 +54,39 @@ async function recordDemo() {
 
 	// ── Step 2: Go to Pages > Add New ───────────────────────
 	console.log( '2. Opening block editor (new page)...' );
-	await page.goto( `${ WP_ADMIN }/post-new.php?post_type=page`, { waitUntil: 'networkidle' } );
-	await sleep( 1500 );
+	await page.goto( `${ WP_ADMIN }/post-new.php?post_type=page`, { waitUntil: 'load', timeout: 60_000 } );
+	await sleep( 2000 );
 
-	// Dismiss welcome dialog if present
-	const dismissBtn = page.locator( 'button:has-text("Close"), button[aria-label="Close"]' ).first();
-	if ( await dismissBtn.isVisible( { timeout: 2_000 } ).catch( () => false ) ) {
-		await dismissBtn.click();
-		await sleep( 400 );
+	// Dismiss any welcome / guide dialogs that appear on first use
+	const overlays = page.locator( '.components-modal__screen-overlay' );
+	for ( let attempt = 0; attempt < 5; attempt++ ) {
+		const visible = await overlays.first().isVisible( { timeout: 1_500 } ).catch( () => false );
+		if ( ! visible ) break;
+		// Try close button with various aria-labels used by Gutenberg
+		for ( const label of [ 'Close', 'close', 'Dismiss' ] ) {
+			const btn = overlays.first().locator( `button[aria-label="${ label }"]` );
+			if ( await btn.isVisible( { timeout: 500 } ).catch( () => false ) ) {
+				await btn.click();
+				await sleep( 600 );
+				break;
+			}
+		}
+		// Fallback: try any button inside the modal that looks like close
+		const anyClose = overlays.first().locator( 'button' ).last();
+		if ( await anyClose.isVisible( { timeout: 500 } ).catch( () => false ) ) {
+			await page.keyboard.press( 'Escape' );
+			await sleep( 600 );
+		}
 	}
 
+	// Wait for the editor canvas to be ready
+	await page.locator( '.block-editor-writing-flow, .editor-styles-wrapper' ).waitFor( { state: 'visible', timeout: 30_000 } );
+	await sleep( 800 );
+
 	// Add page title
-	const titleField = page.locator( '.editor-post-title__input, h1.wp-block[role="textbox"]' ).first();
+	const titleField = page.locator(
+		'.editor-post-title__input, h1.wp-block[role="textbox"], [aria-label="Add title"]'
+	).first();
 	await titleField.click();
 	await titleField.type( 'Search Page' );
 	await sleep( 600 );
@@ -163,7 +184,7 @@ async function recordDemo() {
 		.first();
 	const href = await viewPageLink.getAttribute( 'href' ).catch( () => null );
 	if ( href ) {
-		await page.goto( href, { waitUntil: 'networkidle' } );
+		await page.goto( href, { waitUntil: 'load' } );
 		await sleep( 2000 );
 		await page.screenshot( { path: path.join( VIDEO_DIR, 'step10-frontend.png' ) } );
 
