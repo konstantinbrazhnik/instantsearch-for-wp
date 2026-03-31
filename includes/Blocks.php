@@ -33,6 +33,7 @@ class Blocks {
 		'sort-by',
 		'current-refinements',
 		'clear-refinements',
+		'menu-select',
 	];
 
 	/**

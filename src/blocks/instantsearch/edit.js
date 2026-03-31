@@ -2,6 +2,7 @@ import { useBlockProps, InnerBlocks, InspectorControls } from '@wordpress/block-
 import {
 	PanelBody,
 	TextControl,
+	TextareaControl,
 	ToggleControl,
 	RangeControl,
 	SelectControl,
@@ -20,6 +21,7 @@ const ALLOWED_BLOCKS = [
 	'instantsearch-for-wp/sort-by',
 	'instantsearch-for-wp/current-refinements',
 	'instantsearch-for-wp/clear-refinements',
+	'instantsearch-for-wp/menu-select',
 	'core/columns',
 	'core/column',
 	'core/group',
@@ -39,7 +41,17 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		customAppId,
 		customApiKey,
 		hitsPerPage,
+		attributesToRetrieve,
+		attributesToNotRetrieve,
+		restrictSearchableAttributes,
+		filters,
 		distinct,
+		distinctCount,
+		analytics,
+		clickAnalytics,
+		highlightPreTag,
+		highlightPostTag,
+		snippetAttributes,
 		instanceId,
 		metadata: blockMetadata = {},
 	} = attributes;
@@ -136,10 +148,84 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						min={ 1 }
 						max={ 100 }
 					/>
+					<TextareaControl
+						label={ __( 'Attributes to retrieve', 'instantsearch-for-wp' ) }
+						value={ attributesToRetrieve }
+						onChange={ ( val ) => setAttributes( { attributesToRetrieve: val } ) }
+						placeholder="title, content, url"
+						help={ __( 'Comma-separated list of attributes to fetch. Leave empty to retrieve all.', 'instantsearch-for-wp' ) }
+						rows={ 2 }
+					/>
+					<TextareaControl
+						label={ __( 'Attributes to NOT retrieve', 'instantsearch-for-wp' ) }
+						value={ attributesToNotRetrieve }
+						onChange={ ( val ) => setAttributes( { attributesToNotRetrieve: val } ) }
+						placeholder="password, internal_notes"
+						help={ __( 'Comma-separated list of attributes to exclude. Ignored if "Attributes to retrieve" is set.', 'instantsearch-for-wp' ) }
+						rows={ 2 }
+					/>
+					<TextareaControl
+						label={ __( 'Restrict searchable attributes', 'instantsearch-for-wp' ) }
+						value={ restrictSearchableAttributes }
+						onChange={ ( val ) => setAttributes( { restrictSearchableAttributes: val } ) }
+						placeholder="title, content"
+						help={ __( 'Comma-separated list of attributes to search within. Leave empty to use index defaults.', 'instantsearch-for-wp' ) }
+						rows={ 2 }
+					/>
+					<TextareaControl
+						label={ __( 'Filters', 'instantsearch-for-wp' ) }
+						value={ filters }
+						onChange={ ( val ) => setAttributes( { filters: val } ) }
+						placeholder="status:published AND type:post"
+						help={ __( 'Default filter applied to all queries (Algolia filter syntax).', 'instantsearch-for-wp' ) }
+						rows={ 2 }
+					/>
 					<ToggleControl
 						label={ __( 'Distinct (deduplicate results)', 'instantsearch-for-wp' ) }
 						checked={ distinct }
 						onChange={ ( val ) => setAttributes( { distinct: val } ) }
+					/>
+					{ distinct && (
+						<RangeControl
+							label={ __( 'Distinct count', 'instantsearch-for-wp' ) }
+							value={ distinctCount }
+							onChange={ ( val ) => setAttributes( { distinctCount: val } ) }
+							min={ 1 }
+							max={ 10 }
+							help={ __( 'Maximum number of results per group when distinct is enabled.', 'instantsearch-for-wp' ) }
+						/>
+					) }
+					<ToggleControl
+						label={ __( 'Analytics', 'instantsearch-for-wp' ) }
+						checked={ analytics }
+						onChange={ ( val ) => setAttributes( { analytics: val } ) }
+						help={ __( 'Send search queries to Algolia Analytics.', 'instantsearch-for-wp' ) }
+					/>
+					<ToggleControl
+						label={ __( 'Click analytics', 'instantsearch-for-wp' ) }
+						checked={ clickAnalytics }
+						onChange={ ( val ) => setAttributes( { clickAnalytics: val } ) }
+						help={ __( 'Enable click analytics for conversion tracking.', 'instantsearch-for-wp' ) }
+					/>
+					<TextControl
+						label={ __( 'Highlight pre-tag', 'instantsearch-for-wp' ) }
+						value={ highlightPreTag }
+						onChange={ ( val ) => setAttributes( { highlightPreTag: val } ) }
+						help={ __( 'Opening HTML tag wrapping highlighted text (default: <mark>).', 'instantsearch-for-wp' ) }
+					/>
+					<TextControl
+						label={ __( 'Highlight post-tag', 'instantsearch-for-wp' ) }
+						value={ highlightPostTag }
+						onChange={ ( val ) => setAttributes( { highlightPostTag: val } ) }
+						help={ __( 'Closing HTML tag wrapping highlighted text (default: </mark>).', 'instantsearch-for-wp' ) }
+					/>
+					<TextareaControl
+						label={ __( 'Snippet attributes', 'instantsearch-for-wp' ) }
+						value={ snippetAttributes }
+						onChange={ ( val ) => setAttributes( { snippetAttributes: val } ) }
+						placeholder="content:30, excerpt:20"
+						help={ __( 'Comma-separated list of attributes with optional word count to snippet (e.g. content:30).', 'instantsearch-for-wp' ) }
+						rows={ 2 }
 					/>
 				</PanelBody>
 

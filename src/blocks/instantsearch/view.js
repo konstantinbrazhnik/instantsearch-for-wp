@@ -12,6 +12,7 @@ import {
 	searchBox,
 	hits,
 	refinementList,
+	menuSelect,
 	pagination,
 	stats,
 	sortBy,
@@ -76,6 +77,15 @@ const WIDGET_FACTORIES = {
 			showMoreLimit: config.showMoreLimit || 20,
 			showCount: config.showCount !== false,
 			sortBy: config.sortBy || [ 'isRefined', 'count:desc', 'name:asc' ],
+		} );
+	},
+
+	menuSelect( container, config ) {
+		return menuSelect( {
+			container,
+			attribute: config.attribute || 'post_type',
+			limit: config.limit || 10,
+			sortBy: config.sortBy || [ 'name:asc', 'count:desc' ],
 		} );
 	},
 
@@ -151,14 +161,33 @@ function initInstance( container ) {
 		future: { preserveSharedStateOnUnmount: true },
 	} );
 
+	// Build configure params from block config.
+	const configureParams = {
+		hitsPerPage: config.hitsPerPage || 20,
+		distinct: config.distinct !== undefined ? config.distinct : false,
+		analytics: config.analytics !== false,
+		clickAnalytics: config.clickAnalytics || false,
+		highlightPreTag: config.highlightPreTag || '<mark>',
+		highlightPostTag: config.highlightPostTag || '</mark>',
+		attributesToSnippet: config.snippetAttributes?.length
+			? config.snippetAttributes
+			: [ 'content:50' ],
+		snippetEllipsisText: '…',
+	};
+
+	if ( config.filters ) {
+		configureParams.filters = config.filters;
+	}
+	if ( config.attributesToRetrieve?.length ) {
+		configureParams.attributesToRetrieve = config.attributesToRetrieve;
+	}
+	if ( config.restrictSearchableAttributes?.length ) {
+		configureParams.restrictSearchableAttributes = config.restrictSearchableAttributes;
+	}
+
 	// Base configure widget.
 	const widgets = [
-		configure( {
-			hitsPerPage: config.hitsPerPage || 10,
-			distinct: config.distinct || false,
-			attributesToSnippet: [ 'content:50' ],
-			snippetEllipsisText: '…',
-		} ),
+		configure( configureParams ),
 	];
 
 	// Discover and mount child widget containers.
