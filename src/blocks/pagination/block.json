@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/pagination",
+	"version": "1.0.0",
+	"title": "Pagination",
+	"description": "Page navigation for InstantSearch results.",
+	"category": "instantsearch-for-wp",
+	"icon": "controls-forward",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "pagination", "pages", "navigation", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" },
+		"totalPages": { "type": "number" },
+		"padding": { "type": "number", "default": 3 }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

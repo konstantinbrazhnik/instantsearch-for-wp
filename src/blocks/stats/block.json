@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/stats",
+	"version": "1.0.0",
+	"title": "Stats",
+	"description": "Shows result count and processing time for the current search query.",
+	"category": "instantsearch-for-wp",
+	"icon": "chart-bar",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "stats", "count", "results", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

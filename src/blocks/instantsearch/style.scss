@@ -1,0 +1,221 @@
+/* Frontend styles for the InstantSearch container block */
+
+@use '../../styles/tokens';
+
+.isfwp-block-instance {
+	position: relative;
+	font-size: var( --isfwp-font-size );
+	line-height: var( --isfwp-line-height );
+	color: var( --isfwp-color-text );
+}
+
+/* Import base InstantSearch styles */
+.isfwp-block-instance .ais-Hits-list {
+	display: grid;
+	grid-template-columns: minmax( 0, 1fr );
+	gap: var( --isfwp-space-lg );
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+@media ( min-width: 768px ) {
+	.isfwp-block-instance .ais-Hits-list {
+		grid-template-columns: repeat( var( --isfwp-hits-tablet-columns, 2 ), minmax( 0, 1fr ) );
+	}
+}
+
+@media ( min-width: 1024px ) {
+	.isfwp-block-instance .ais-Hits-list {
+		grid-template-columns: repeat( var( --isfwp-hits-columns, 3 ), minmax( 0, 1fr ) );
+	}
+}
+
+.isfwp-block-instance .ais-Hits-item {
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border );
+	border-radius: var( --isfwp-radius-sm );
+	padding: var( --isfwp-space-md );
+}
+
+.isfwp-block-instance .ais-SearchBox-form {
+	display: flex;
+	gap: var( --isfwp-space-xs );
+	margin-bottom: var( --isfwp-space-md );
+}
+
+.isfwp-block-instance .ais-SearchBox-input {
+	flex: 1;
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
+	border-radius: var( --isfwp-radius-sm );
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+	background: var( --isfwp-color-surface );
+}
+
+.isfwp-block-instance .ais-SearchBox-submit,
+.isfwp-block-instance .ais-SearchBox-reset {
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
+	border-radius: var( --isfwp-radius-sm );
+	cursor: pointer;
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+	background: var( --isfwp-color-surface-alt );
+}
+
+.isfwp-block-instance .ais-Pagination-list {
+	display: flex;
+	list-style: none;
+	margin: var( --isfwp-space-md ) 0 0;
+	padding: 0;
+	gap: calc( var( --isfwp-space-xs ) / 2 );
+}
+
+.isfwp-block-instance .ais-Pagination-item {
+	a, span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2rem;
+		height: 2rem;
+		padding: 0 var( --isfwp-space-xs );
+		border: var( --isfwp-border-width ) solid var( --isfwp-color-border );
+		border-radius: var( --isfwp-radius-sm );
+		text-decoration: none;
+		color: inherit;
+		background: var( --isfwp-color-surface );
+	}
+}
+
+.isfwp-block-instance .ais-Pagination-item--selected a {
+	background: var( --isfwp-color-accent );
+	border-color: var( --isfwp-color-accent );
+	color: var( --isfwp-color-accent-contrast );
+}
+
+.isfwp-block-instance .ais-Pagination-item--disabled span {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.isfwp-block-instance .ais-Stats {
+	font-size: var( --isfwp-font-size-sm );
+	color: var( --isfwp-color-text-muted );
+	margin-bottom: var( --isfwp-space-sm );
+}
+
+.isfwp-block-instance .ais-Panel {
+	margin-bottom: var( --isfwp-space-md );
+}
+
+.isfwp-block-instance .ais-Panel-header {
+	margin: 0 0 var( --isfwp-space-sm );
+	font-size: var( --isfwp-font-size );
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.isfwp-block-instance .ais-RefinementList {
+	margin-bottom: var( --isfwp-space-md );
+}
+
+.isfwp-block-instance .ais-RefinementList-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.isfwp-block-instance .ais-RefinementList-item {
+	padding: calc( var( --isfwp-space-xs ) / 2 ) 0;
+}
+
+.isfwp-block-instance .ais-RefinementList-labelText {
+	margin-left: var( --isfwp-space-xs );
+}
+
+.isfwp-block-instance .ais-RefinementList-count {
+	margin-left: var( --isfwp-space-xs );
+	font-size: var( --isfwp-font-size-sm );
+	color: var( --isfwp-color-text-muted );
+}
+
+.isfwp-block-instance .ais-ClearRefinements-button {
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	background: var( --isfwp-color-surface );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border );
+	border-radius: var( --isfwp-radius-sm );
+	cursor: pointer;
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+}
+
+.isfwp-block-instance .ais-ClearRefinements-button--disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.isfwp-block-instance .ais-CurrentRefinements-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --isfwp-space-xs );
+	list-style: none;
+	margin: 0 0 var( --isfwp-space-sm );
+	padding: 0;
+}
+
+.isfwp-block-instance .ais-CurrentRefinements-item {
+	display: flex;
+	align-items: center;
+	gap: calc( var( --isfwp-space-xs ) / 2 );
+	padding: calc( var( --isfwp-space-xs ) / 2 ) var( --isfwp-space-xs );
+	background: var( --isfwp-color-accent-soft );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-accent-soft-border );
+	border-radius: var( --isfwp-radius-pill );
+	font-size: var( --isfwp-font-size-sm );
+}
+
+.isfwp-block-instance .ais-CurrentRefinements-delete {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	line-height: 1;
+	color: var( --isfwp-color-accent );
+}
+
+.isfwp-block-instance .ais-SortBy-select,
+.isfwp-block-instance .ais-MenuSelect-select,
+.isfwp-block-instance .ais-HitsPerPage-select {
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
+	border-radius: var( --isfwp-radius-sm );
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+	background: var( --isfwp-color-surface );
+	width: 100%;
+}
+
+.isfwp-block-instance .isfwp-hits-per-page__label {
+	margin: 0 0 var( --isfwp-space-sm );
+	font-size: var( --isfwp-font-size );
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.isfwp-block-instance mark {
+	background-color: var( --isfwp-color-mark );
+	color: inherit;
+}

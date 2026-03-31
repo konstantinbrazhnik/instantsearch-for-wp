@@ -30,6 +30,7 @@ function PostExclusionPanel() {
     const [ error, setError ]             = useState( null );
     const [ exclusions, setExclusions ]   = useState( [] );
     const [ indices, setIndices ]         = useState( [] );
+    const [ showExcerpt, setShowExcerpt ] = useState( false );
 
     // -------------------------------------------------------------------------
     // Fetch current state on mount
@@ -48,6 +49,7 @@ function PostExclusionPanel() {
             .then( ( data ) => {
                 setExclusions( data.exclusions || [] );
                 setIndices( data.indices || [] );
+                setShowExcerpt( !! data.show_excerpt );
                 setIsLoading( false );
             } )
             .catch( ( err ) => {
@@ -59,8 +61,8 @@ function PostExclusionPanel() {
     // -------------------------------------------------------------------------
     // Persist changes
     // -------------------------------------------------------------------------
-    const saveExclusions = useCallback(
-        ( newExclusions ) => {
+    const saveSettings = useCallback(
+        ( { newExclusions = exclusions, newShowExcerpt = showExcerpt } ) => {
             setIsSaving( true );
             setError( null );
 
@@ -71,10 +73,14 @@ function PostExclusionPanel() {
                     'X-WP-Nonce': nonce,
                     'Content-Type': 'application/json',
                 },
-                data: { exclusions: newExclusions },
+                data: {
+                    exclusions: newExclusions,
+                    show_excerpt: newShowExcerpt,
+                },
             } )
                 .then( ( data ) => {
                     setExclusions( data.exclusions || [] );
+                    setShowExcerpt( !! data.show_excerpt );
                     setIsSaving( false );
                 } )
                 .catch( ( err ) => {
@@ -82,7 +88,7 @@ function PostExclusionPanel() {
                     setIsSaving( false );
                 } );
         },
-        [ apiUrl, nonce, postId ] // eslint-disable-line react-hooks/exhaustive-deps
+        [ apiUrl, nonce, postId, exclusions, showExcerpt ] // eslint-disable-line react-hooks/exhaustive-deps
     );
 
     // -------------------------------------------------------------------------
@@ -92,7 +98,7 @@ function PostExclusionPanel() {
     const allSlugs    = indices.map( ( i ) => i.slug );
 
     const toggleAll = ( checked ) => {
-        saveExclusions( checked ? [ '__all__' ] : [] );
+        saveSettings( { newExclusions: checked ? [ '__all__' ] : [] } );
     };
 
     const toggleIndex = ( slug, checked ) => {
@@ -106,7 +112,11 @@ function PostExclusionPanel() {
                 next = allSlugs.filter( ( s ) => s !== slug );
             }
         }
-        saveExclusions( next );
+        saveSettings( { newExclusions: next } );
+    };
+
+    const toggleShowExcerpt = ( checked ) => {
+        saveSettings( { newShowExcerpt: checked } );
     };
 
     const isIndexExcluded = ( slug ) => excludeAll || exclusions.includes( slug );
@@ -139,6 +149,15 @@ function PostExclusionPanel() {
             ) }
 
             { isSaving && <Spinner /> }
+
+            <CheckboxControl
+                label={ <strong>{ __( 'Show excerpt in search results', 'instantsearch-for-wp' ) }</strong> }
+                checked={ showExcerpt }
+                onChange={ toggleShowExcerpt }
+                disabled={ isSaving }
+            />
+
+            <hr style={ { margin: '8px 0' } } />
 
             <CheckboxControl
                 label={ <strong>{ __( 'Exclude from all indices', 'instantsearch-for-wp' ) }</strong> }

@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/current-refinements",
+	"version": "1.0.0",
+	"title": "Current Refinements",
+	"description": "Shows active filter chips so users can see and remove individual refinements.",
+	"category": "instantsearch-for-wp",
+	"icon": "tag",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "active filters", "chips", "refinements", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" },
+		"excludedAttributes": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

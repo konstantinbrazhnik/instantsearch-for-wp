@@ -1,0 +1,99 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/instantsearch",
+	"version": "1.0.0",
+	"title": "InstantSearch",
+	"description": "A container that initializes an InstantSearch instance. Add search widgets inside.",
+	"category": "instantsearch-for-wp",
+	"icon": "search",
+	"keywords": [ "search", "algolia", "typesense", "instantsearch", "facet" ],
+	"textdomain": "instantsearch-for-wp",
+	"attributes": {
+		"metadata": {
+			"type": "object"
+		},
+		"indexName": {
+			"type": "string",
+			"default": ""
+		},
+		"useGlobalCredentials": {
+			"type": "boolean",
+			"default": true
+		},
+		"customAppId": {
+			"type": "string",
+			"default": ""
+		},
+		"customApiKey": {
+			"type": "string",
+			"default": ""
+		},
+		"hitsPerPage": {
+			"type": "number",
+			"default": 20
+		},
+		"attributesToRetrieve": {
+			"type": "string",
+			"default": ""
+		},
+		"attributesToNotRetrieve": {
+			"type": "string",
+			"default": ""
+		},
+		"restrictSearchableAttributes": {
+			"type": "string",
+			"default": ""
+		},
+		"filters": {
+			"type": "string",
+			"default": ""
+		},
+		"distinct": {
+			"type": "boolean",
+			"default": false
+		},
+		"distinctCount": {
+			"type": "number",
+			"default": 1
+		},
+		"analytics": {
+			"type": "boolean",
+			"default": true
+		},
+		"clickAnalytics": {
+			"type": "boolean",
+			"default": false
+		},
+		"highlightPreTag": {
+			"type": "string",
+			"default": "<mark>"
+		},
+		"highlightPostTag": {
+			"type": "string",
+			"default": "</mark>"
+		},
+		"snippetAttributes": {
+			"type": "string",
+			"default": ""
+		},
+		"instanceId": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"providesContext": {
+		"instantsearch/instanceId": "instanceId"
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true, "padding": true },
+		"color": { "background": true, "text": true }
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

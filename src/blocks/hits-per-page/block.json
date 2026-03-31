@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/hits-per-page",
+	"version": "1.0.0",
+	"title": "Hits Per Page",
+	"description": "A dropdown that lets users choose how many results to show per page.",
+	"category": "instantsearch-for-wp",
+	"icon": "list-view",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "hits per page", "results", "page size", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" },
+		"label": { "type": "string", "default": "Results per page" },
+		"items": {
+			"type": "array",
+			"default": [
+				{ "label": "10", "value": 10, "default": true },
+				{ "label": "20", "value": 20, "default": false },
+				{ "label": "50", "value": 50, "default": false }
+			],
+			"items": {
+				"type": "object",
+				"properties": {
+					"label": { "type": "string" },
+					"value": { "type": "number" },
+					"default": { "type": "boolean" }
+				}
+			}
+		}
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

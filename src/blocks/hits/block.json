@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/hits",
+	"version": "1.0.0",
+	"title": "Hits",
+	"description": "Displays search results from an InstantSearch instance.",
+	"category": "instantsearch-for-wp",
+	"icon": "list-view",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "results", "hits", "search results", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" },
+		"showImage": { "type": "boolean", "default": true },
+		"showExcerpt": { "type": "boolean", "default": true },
+		"customClass": { "type": "string", "default": "" },
+		"hitTemplate": {
+			"type": "string",
+			"default": "<article class=\"isfwp-hit\">\n  <a href=\"{{permalink}}\">\n    <img src=\"{{image}}\" alt=\"{{title}}\" />\n    <h3>{{{_highlightResult.title.value}}}</h3>\n    <p>{{{_highlightResult.excerpt.value}}}</p>\n  </a>\n</article>"
+		},
+		"imageSize": { "type": "string", "default": "thumbnail" },
+		"hitsPerPage": { "type": "number", "default": 10 },
+		"tabletColumns": { "type": "number", "default": 2 },
+		"columns": { "type": "number", "default": 3 }
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/menu-select",
+	"version": "1.0.0",
+	"title": "Menu Select",
+	"description": "A dropdown refinement widget. Lets users filter results by selecting a single value from a select element.",
+	"category": "instantsearch-for-wp",
+	"icon": "arrow-down-alt2",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "facet", "filter", "dropdown", "select", "menu", "refinement", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" },
+		"attribute": { "type": "string", "default": "post_type" },
+		"label": { "type": "string", "default": "" },
+		"hideWhenEmpty": { "type": "boolean", "default": true },
+		"limit": { "type": "number", "default": 10 },
+		"sortBy": {
+			"type": "array",
+			"items": { "type": "string" },
+			"default": [ "name:asc", "count:desc" ]
+		}
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}
