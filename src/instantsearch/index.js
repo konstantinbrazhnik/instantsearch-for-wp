@@ -4,7 +4,6 @@ import A11yDialog from 'a11y-dialog';
 import instantsearch from 'instantsearch.js';
 import { algoliasearch } from 'algoliasearch';
 import {
-	chat,
 	clearRefinements,
 	configure,
 	dynamicWidgets,
@@ -148,25 +147,7 @@ search.on('render', () => {
 	}
 });
 
-if ( instantSearchForWPFrontend.conversationalSearch ) {
-	search.addWidgets([
-		chat({
-			container: '#algolia-chat',
-			agentId: instantSearchForWPFrontend.conversationalSearch,
-			templates: {
-				item(hit, { html, components }) {
-					return html`
-						<p><strong><a href="${hit.url}">${hit.title}</a></strong><br />${components.Snippet({ attribute: 'content', hit })}</p>
-					`;
-				},
-			},
-			getSearchPageURL: () => {
-				dialog.show();
-				return '#search';
-			},
-		})
-	]);
-}
+// chat widget disabled — not available in installed instantsearch.js version
 
 // Initialize search on dialog show
 dialog.on('show', async () => {

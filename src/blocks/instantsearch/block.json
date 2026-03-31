@@ -31,11 +31,51 @@
 		},
 		"hitsPerPage": {
 			"type": "number",
-			"default": 10
+			"default": 20
+		},
+		"attributesToRetrieve": {
+			"type": "string",
+			"default": ""
+		},
+		"attributesToNotRetrieve": {
+			"type": "string",
+			"default": ""
+		},
+		"restrictSearchableAttributes": {
+			"type": "string",
+			"default": ""
+		},
+		"filters": {
+			"type": "string",
+			"default": ""
 		},
 		"distinct": {
 			"type": "boolean",
 			"default": false
+		},
+		"distinctCount": {
+			"type": "number",
+			"default": 1
+		},
+		"analytics": {
+			"type": "boolean",
+			"default": true
+		},
+		"clickAnalytics": {
+			"type": "boolean",
+			"default": false
+		},
+		"highlightPreTag": {
+			"type": "string",
+			"default": "<mark>"
+		},
+		"highlightPostTag": {
+			"type": "string",
+			"default": "</mark>"
+		},
+		"snippetAttributes": {
+			"type": "string",
+			"default": ""
 		},
 		"instanceId": {
 			"type": "string",
