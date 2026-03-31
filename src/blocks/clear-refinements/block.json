@@ -10,6 +10,7 @@
 	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
 	"keywords": [ "clear", "reset", "filters", "instantsearch" ],
 	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
 	"attributes": {
 		"metadata": { "type": "object" },
 		"buttonLabel": { "type": "string", "default": "Clear refinements" },

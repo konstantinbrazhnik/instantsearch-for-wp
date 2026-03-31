@@ -1,54 +1,69 @@
 /* Frontend styles for the InstantSearch container block */
 
+@import '../../styles/tokens';
+
 .isfwp-block-instance {
 	position: relative;
+	font-size: var( --isfwp-font-size );
+	line-height: var( --isfwp-line-height );
+	color: var( --isfwp-color-text );
 }
 
 /* Import base InstantSearch styles */
 .isfwp-block-instance .ais-Hits-list {
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( 280px, 1fr ) );
-	gap: 1.5rem;
+	gap: var( --isfwp-space-lg );
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
 .isfwp-block-instance .ais-Hits-item {
-	border: 1px solid #e2e8f0;
-	border-radius: 4px;
-	padding: 1rem;
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border );
+	border-radius: var( --isfwp-radius-sm );
+	padding: var( --isfwp-space-md );
 }
 
 .isfwp-block-instance .ais-SearchBox-form {
 	display: flex;
-	gap: 0.5rem;
-	margin-bottom: 1rem;
+	gap: var( --isfwp-space-xs );
+	margin-bottom: var( --isfwp-space-md );
 }
 
 .isfwp-block-instance .ais-SearchBox-input {
 	flex: 1;
-	padding: 0.5rem 0.75rem;
-	border: 1px solid #cbd5e0;
-	border-radius: 4px;
-	font-size: 1rem;
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
+	border-radius: var( --isfwp-radius-sm );
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+	background: var( --isfwp-color-surface );
 }
 
 .isfwp-block-instance .ais-SearchBox-submit,
 .isfwp-block-instance .ais-SearchBox-reset {
-	padding: 0.5rem 1rem;
-	border: 1px solid #cbd5e0;
-	border-radius: 4px;
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
+	border-radius: var( --isfwp-radius-sm );
 	cursor: pointer;
-	background: #f7fafc;
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+	background: var( --isfwp-color-surface-alt );
 }
 
 .isfwp-block-instance .ais-Pagination-list {
 	display: flex;
 	list-style: none;
-	margin: 1rem 0 0;
+	margin: var( --isfwp-space-md ) 0 0;
 	padding: 0;
-	gap: 0.25rem;
+	gap: calc( var( --isfwp-space-xs ) / 2 );
 }
 
 .isfwp-block-instance .ais-Pagination-item {
@@ -58,18 +73,19 @@
 		justify-content: center;
 		min-width: 2rem;
 		height: 2rem;
-		padding: 0 0.5rem;
-		border: 1px solid #e2e8f0;
-		border-radius: 4px;
+		padding: 0 var( --isfwp-space-xs );
+		border: var( --isfwp-border-width ) solid var( --isfwp-color-border );
+		border-radius: var( --isfwp-radius-sm );
 		text-decoration: none;
 		color: inherit;
+		background: var( --isfwp-color-surface );
 	}
 }
 
 .isfwp-block-instance .ais-Pagination-item--selected a {
-	background: #3182ce;
-	border-color: #3182ce;
-	color: #fff;
+	background: var( --isfwp-color-accent );
+	border-color: var( --isfwp-color-accent );
+	color: var( --isfwp-color-accent-contrast );
 }
 
 .isfwp-block-instance .ais-Pagination-item--disabled span {
@@ -78,13 +94,13 @@
 }
 
 .isfwp-block-instance .ais-Stats {
-	font-size: 0.875rem;
-	color: #718096;
-	margin-bottom: 0.75rem;
+	font-size: var( --isfwp-font-size-sm );
+	color: var( --isfwp-color-text-muted );
+	margin-bottom: var( --isfwp-space-sm );
 }
 
 .isfwp-block-instance .ais-RefinementList {
-	margin-bottom: 1rem;
+	margin-bottom: var( --isfwp-space-md );
 }
 
 .isfwp-block-instance .ais-RefinementList-list {
@@ -94,26 +110,30 @@
 }
 
 .isfwp-block-instance .ais-RefinementList-item {
-	padding: 0.25rem 0;
+	padding: calc( var( --isfwp-space-xs ) / 2 ) 0;
 }
 
 .isfwp-block-instance .ais-RefinementList-labelText {
-	margin-left: 0.5rem;
+	margin-left: var( --isfwp-space-xs );
 }
 
 .isfwp-block-instance .ais-RefinementList-count {
-	margin-left: 0.5rem;
-	font-size: 0.75rem;
-	color: #718096;
+	margin-left: var( --isfwp-space-xs );
+	font-size: var( --isfwp-font-size-sm );
+	color: var( --isfwp-color-text-muted );
 }
 
 .isfwp-block-instance .ais-ClearRefinements-button {
-	padding: 0.375rem 0.75rem;
-	background: #fff;
-	border: 1px solid #e2e8f0;
-	border-radius: 4px;
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	background: var( --isfwp-color-surface );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border );
+	border-radius: var( --isfwp-radius-sm );
 	cursor: pointer;
-	font-size: 0.875rem;
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
 }
 
 .isfwp-block-instance .ais-ClearRefinements-button--disabled {
@@ -124,21 +144,21 @@
 .isfwp-block-instance .ais-CurrentRefinements-list {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.5rem;
+	gap: var( --isfwp-space-xs );
 	list-style: none;
-	margin: 0 0 0.75rem;
+	margin: 0 0 var( --isfwp-space-sm );
 	padding: 0;
 }
 
 .isfwp-block-instance .ais-CurrentRefinements-item {
 	display: flex;
 	align-items: center;
-	gap: 0.25rem;
-	padding: 0.25rem 0.5rem;
-	background: #ebf8ff;
-	border: 1px solid #bee3f8;
-	border-radius: 9999px;
-	font-size: 0.8125rem;
+	gap: calc( var( --isfwp-space-xs ) / 2 );
+	padding: calc( var( --isfwp-space-xs ) / 2 ) var( --isfwp-space-xs );
+	background: var( --isfwp-color-accent-soft );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-accent-soft-border );
+	border-radius: var( --isfwp-radius-pill );
+	font-size: var( --isfwp-font-size-sm );
 }
 
 .isfwp-block-instance .ais-CurrentRefinements-delete {
@@ -147,18 +167,23 @@
 	cursor: pointer;
 	padding: 0;
 	line-height: 1;
-	color: #2b6cb0;
+	color: var( --isfwp-color-accent );
 }
 
-.isfwp-block-instance .ais-SortBy-select {
-	padding: 0.375rem 0.75rem;
-	border: 1px solid #e2e8f0;
-	border-radius: 4px;
-	font-size: 0.875rem;
-	background: #fff;
+.isfwp-block-instance .ais-SortBy-select,
+.isfwp-block-instance .ais-MenuSelect-select {
+	min-height: var( --isfwp-control-min-height );
+	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
+	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
+	border-radius: var( --isfwp-radius-sm );
+	font-size: var( --isfwp-font-size );
+	line-height: 1.25;
+	box-sizing: border-box;
+	color: var( --isfwp-color-text );
+	background: var( --isfwp-color-surface );
 }
 
 .isfwp-block-instance mark {
-	background-color: #fefcbf;
+	background-color: var( --isfwp-color-mark );
 	color: inherit;
 }

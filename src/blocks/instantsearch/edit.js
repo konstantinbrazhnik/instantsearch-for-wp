@@ -100,6 +100,13 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Index', 'instantsearch-for-wp' ) } initialOpen>
+					<TextControl
+						label={ __( 'Instance ID', 'instantsearch-for-wp' ) }
+						help={ __( 'Unique identifier for this search instance. Used for CSS targeting and PHP filter hooks. Leave blank for auto-generated.', 'instantsearch-for-wp' ) }
+						value={ instanceId }
+						onChange={ ( val ) => setAttributes( { instanceId: val.replace( /[^a-zA-Z0-9_-]/g, '' ) } ) }
+						placeholder={ __( 'e.g. product-search, blog-search', 'instantsearch-for-wp' ) }
+					/>
 					<SelectControl
 						label={ __( 'Index', 'instantsearch-for-wp' ) }
 						value={ indexName }
