@@ -36,11 +36,22 @@ const WIDGET_FACTORIES = {
 	},
 
 	hits( container, config ) {
-		return hits( {
-			container,
-			templates: {
+		// When a custom Mustache template string is provided, pass it directly —
+		// InstantSearch.js natively renders string templates via Hogan/Mustache.
+		const templates = config.hitTemplate
+			? {
+				item: config.hitTemplate,
+				empty( results, { html } ) {
+					return html`
+						<div class="isfwp-hits-empty">
+							No results for <strong>${ results.query }</strong>.
+						</div>
+					`;
+				},
+			}
+			: {
 				item( hit, { html, components } ) {
-					const image = hit.image
+					const image = config.showImage && hit.image
 						? html`<img src="${ hit.image }" alt="${ hit.title }" class="isfwp-hit-image" />`
 						: '';
 					return html`
@@ -64,8 +75,9 @@ const WIDGET_FACTORIES = {
 						</div>
 					`;
 				},
-			},
-		} );
+			};
+
+		return hits( { container, templates } );
 	},
 
 	refinementList( container, config ) {
@@ -161,9 +173,24 @@ function initInstance( container ) {
 		future: { preserveSharedStateOnUnmount: true },
 	} );
 
+	// Allow a child hits widget to override hitsPerPage at the widget level.
+	let hitsPerPage = config.hitsPerPage || 20;
+	container.querySelectorAll( '[data-isfwp-widget="hits"]' ).forEach( ( el ) => {
+		if ( el.dataset.isfwpConfig ) {
+			try {
+				const hitsConfig = JSON.parse( el.dataset.isfwpConfig );
+				if ( hitsConfig.hitsPerPage ) {
+					hitsPerPage = hitsConfig.hitsPerPage;
+				}
+			} catch ( e ) {
+				// ignore
+			}
+		}
+	} );
+
 	// Build configure params from block config.
 	const configureParams = {
-		hitsPerPage: config.hitsPerPage || 20,
+		hitsPerPage,
 		distinct: config.distinct !== undefined ? config.distinct : false,
 		analytics: config.analytics !== false,
 		clickAnalytics: config.clickAnalytics || false,

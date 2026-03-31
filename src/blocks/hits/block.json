@@ -13,10 +13,15 @@
 	"usesContext": [ "instantsearch/instanceId" ],
 	"attributes": {
 		"metadata": { "type": "object" },
-		"showImage": { "type": "boolean", "default": false },
+		"showImage": { "type": "boolean", "default": true },
 		"showExcerpt": { "type": "boolean", "default": true },
 		"customClass": { "type": "string", "default": "" },
-		"hitTemplate": { "type": "string", "default": "" }
+		"hitTemplate": {
+			"type": "string",
+			"default": "<article class=\"isfwp-hit\">\n  <a href=\"{{permalink}}\">\n    <img src=\"{{image}}\" alt=\"{{title}}\" />\n    <h3>{{{_highlightResult.title.value}}}</h3>\n    <p>{{{_highlightResult.excerpt.value}}}</p>\n  </a>\n</article>"
+		},
+		"imageSize": { "type": "string", "default": "thumbnail" },
+		"hitsPerPage": { "type": "number", "default": 10 }
 	},
 	"supports": { "html": false, "spacing": { "margin": true } },
 	"editorScript": "file:./index.js",
