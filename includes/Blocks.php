@@ -28,6 +28,7 @@ class Blocks {
 		'search-box',
 		'hits',
 		'hits-per-page',
+		'configure',
 		'refinement-list',
 		'pagination',
 		'stats',
