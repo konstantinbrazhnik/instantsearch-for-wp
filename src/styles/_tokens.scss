@@ -1,0 +1,36 @@
+/* Shared theme-aware tokens for InstantSearch UI */
+
+:root {
+	--isfwp-font-size: var( --wp--preset--font-size--normal, 1rem );
+	--isfwp-font-size-sm: var( --wp--preset--font-size--small, 0.875rem );
+	--isfwp-line-height: var( --wp--custom--typography--line-height--normal, 1.5 );
+
+	--isfwp-space-xs: var( --wp--preset--spacing--20, 0.5rem );
+	--isfwp-space-sm: var( --wp--preset--spacing--30, 0.75rem );
+	--isfwp-space-md: var( --wp--preset--spacing--40, 1rem );
+	--isfwp-space-lg: var( --wp--preset--spacing--50, 1.5rem );
+
+	--isfwp-radius-sm: var( --wp--custom--border--radius--small, 4px );
+	--isfwp-radius-pill: 9999px;
+	--isfwp-border-width: 1px;
+
+	--isfwp-color-text: var( --wp--preset--color--contrast, #1a202c );
+	--isfwp-color-text-muted: var( --wp--preset--color--secondary, #718096 );
+	--isfwp-color-surface: var( --wp--preset--color--base, #fff );
+	--isfwp-color-surface-alt: var( --wp--preset--color--base-2, #f7fafc );
+	--isfwp-color-border: var( --wp--preset--color--neutral, #e2e8f0 );
+	--isfwp-color-border-strong: var( --wp--preset--color--neutral-2, #cbd5e0 );
+	--isfwp-color-accent: var( --wp--preset--color--primary, #3182ce );
+	--isfwp-color-accent-contrast: var( --wp--preset--color--base, #fff );
+	--isfwp-color-accent-soft: var( --wp--preset--color--tertiary, #ebf8ff );
+	--isfwp-color-accent-soft-border: var( --wp--preset--color--accent-5, #bee3f8 );
+	--isfwp-color-mark: var( --wp--preset--color--accent-4, #fefcbf );
+	--isfwp-color-danger: var( --wp--preset--color--vivid-red, #9c1d1d );
+
+	--isfwp-control-min-height: 2.5rem;
+	--isfwp-control-padding-inline: var( --isfwp-space-sm );
+	--isfwp-control-padding-block: calc( var( --isfwp-space-xs ) - 1px );
+
+	--isfwp-gap-spacing: 3rem;
+	--isfwp-site-search-container-width: 1200px;
+}
