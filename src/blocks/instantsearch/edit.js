@@ -15,6 +15,7 @@ import { __ } from '@wordpress/i18n';
 const ALLOWED_BLOCKS = [
 	'instantsearch-for-wp/search-box',
 	'instantsearch-for-wp/hits',
+	'instantsearch-for-wp/hits-per-page',
 	'instantsearch-for-wp/refinement-list',
 	'instantsearch-for-wp/pagination',
 	'instantsearch-for-wp/stats',

@@ -10,7 +10,7 @@ const COMMON_ATTRIBUTES = [
 ];
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { attribute, label, limit, showMore, showMoreLimit, showCount, sortBy } = attributes;
+	const { attribute, label, hideWhenEmpty, limit, showMore, showMoreLimit, showCount, sortBy } = attributes;
 
 	return (
 		<>
@@ -27,7 +27,12 @@ export default function Edit( { attributes, setAttributes } ) {
 						value={ label }
 						onChange={ ( val ) => setAttributes( { label: val } ) }
 						placeholder={ attribute }
-						help={ __( 'Displayed above the list. Defaults to the attribute name.', 'instantsearch-for-wp' ) }
+						help={ __( 'Used as the panel heading. Defaults to the attribute name.', 'instantsearch-for-wp' ) }
+					/>
+					<ToggleControl
+						label={ __( 'Hide panel if no facet values are available', 'instantsearch-for-wp' ) }
+						checked={ hideWhenEmpty }
+						onChange={ ( val ) => setAttributes( { hideWhenEmpty: val } ) }
 					/>
 					<RangeControl
 						label={ __( 'Max items shown', 'instantsearch-for-wp' ) }

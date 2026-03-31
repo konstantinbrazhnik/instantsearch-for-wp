@@ -5,10 +5,15 @@
  * @var array $attributes Block attributes.
  */
 
-$config = wp_json_encode( [
-	'totalPages' => isset( $attributes['totalPages'] ) ? (int) $attributes['totalPages'] : null,
-	'padding'    => (int) ( $attributes['padding'] ?? 3 ),
-] );
+$config_data = [
+	'padding' => (int) ( $attributes['padding'] ?? 3 ),
+];
+
+if ( isset( $attributes['totalPages'] ) && '' !== $attributes['totalPages'] ) {
+	$config_data['totalPages'] = (int) $attributes['totalPages'];
+}
+
+$config = wp_json_encode( $config_data );
 ?>
 <div
 	<?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>

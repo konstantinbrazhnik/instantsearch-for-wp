@@ -1,9 +1,9 @@
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, TextControl, RangeControl } from '@wordpress/components';
+import { PanelBody, TextControl, RangeControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { attribute, label, limit, sortBy } = attributes;
+	const { attribute, label, hideWhenEmpty, limit, sortBy } = attributes;
 
 	return (
 		<>
@@ -20,7 +20,12 @@ export default function Edit( { attributes, setAttributes } ) {
 						value={ label }
 						onChange={ ( val ) => setAttributes( { label: val } ) }
 						placeholder={ attribute }
-						help={ __( 'Displayed above the dropdown. Defaults to the attribute name.', 'instantsearch-for-wp' ) }
+						help={ __( 'Used as the panel heading. Defaults to the attribute name.', 'instantsearch-for-wp' ) }
+					/>
+					<ToggleControl
+						label={ __( 'Hide panel if no facet values are available', 'instantsearch-for-wp' ) }
+						checked={ hideWhenEmpty }
+						onChange={ ( val ) => setAttributes( { hideWhenEmpty: val } ) }
 					/>
 					<RangeControl
 						label={ __( 'Max options shown', 'instantsearch-for-wp' ) }

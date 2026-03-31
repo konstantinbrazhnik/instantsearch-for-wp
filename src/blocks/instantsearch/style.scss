@@ -111,6 +111,17 @@
 	margin-bottom: var( --isfwp-space-sm );
 }
 
+.isfwp-block-instance .ais-Panel {
+	margin-bottom: var( --isfwp-space-md );
+}
+
+.isfwp-block-instance .ais-Panel-header {
+	margin: 0 0 var( --isfwp-space-sm );
+	font-size: var( --isfwp-font-size );
+	font-weight: 600;
+	line-height: 1.3;
+}
+
 .isfwp-block-instance .ais-RefinementList {
 	margin-bottom: var( --isfwp-space-md );
 }
@@ -183,7 +194,8 @@
 }
 
 .isfwp-block-instance .ais-SortBy-select,
-.isfwp-block-instance .ais-MenuSelect-select {
+.isfwp-block-instance .ais-MenuSelect-select,
+.isfwp-block-instance .ais-HitsPerPage-select {
 	min-height: var( --isfwp-control-min-height );
 	padding: var( --isfwp-control-padding-block ) var( --isfwp-control-padding-inline );
 	border: var( --isfwp-border-width ) solid var( --isfwp-color-border-strong );
@@ -194,6 +206,13 @@
 	color: var( --isfwp-color-text );
 	background: var( --isfwp-color-surface );
 	width: 100%;
+}
+
+.isfwp-block-instance .isfwp-hits-per-page__label {
+	margin: 0 0 var( --isfwp-space-sm );
+	font-size: var( --isfwp-font-size );
+	font-weight: 600;
+	line-height: 1.3;
 }
 
 .isfwp-block-instance mark {

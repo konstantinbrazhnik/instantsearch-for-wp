@@ -12,8 +12,10 @@ import { applyFilters } from '@wordpress/hooks';
 import {
 	searchBox,
 	hits,
+	panel,
 	refinementList,
 	menuSelect,
+	hitsPerPage,
 	pagination,
 	stats,
 	sortBy,
@@ -21,6 +23,23 @@ import {
 	clearRefinements,
 	configure,
 } from 'instantsearch.js/es/widgets';
+
+function withFacetPanel( widgetFactory, container, config, widgetOptions ) {
+	const label = config.label || config.attribute || '';
+	const hideWhenEmpty = config.hideWhenEmpty !== false;
+
+	return panel( {
+		templates: {
+			header: label,
+		},
+		hidden( options ) {
+			return hideWhenEmpty && Array.isArray( options.items ) && options.items.length === 0;
+		},
+	} )( widgetFactory )( {
+		container,
+		...widgetOptions,
+	} );
+}
 
 /**
  * Widget factory map: data-isfwp-widget value → widget factory function.
@@ -130,8 +149,7 @@ const WIDGET_FACTORIES = {
 	},
 
 	refinementList( container, config ) {
-		return refinementList( {
-			container,
+		return withFacetPanel( refinementList, container, config, {
 			attribute: config.attribute || 'post_type',
 			limit: config.limit || 10,
 			showMore: config.showMore || false,
@@ -142,20 +160,43 @@ const WIDGET_FACTORIES = {
 	},
 
 	menuSelect( container, config ) {
-		return menuSelect( {
-			container,
+		return withFacetPanel( menuSelect, container, config, {
 			attribute: config.attribute || 'post_type',
 			limit: config.limit || 10,
 			sortBy: config.sortBy || [ 'name:asc', 'count:desc' ],
 		} );
 	},
 
-	pagination( container, config ) {
-		return pagination( {
+	hitsPerPage( container, config ) {
+		const items = Array.isArray( config.items )
+			? config.items.filter( ( item ) => Number.isFinite( Number( item?.value ) ) && Number( item.value ) > 0 ).map( ( item ) => ( {
+				label: item.label || String( item.value ),
+				value: Number( item.value ),
+				default: item.default === true,
+			} ) )
+			: [];
+
+		if ( items.length === 0 ) {
+			return null;
+		}
+
+		return hitsPerPage( {
 			container,
-			totalPages: config.totalPages,
-			padding: config.padding || 3,
+			items,
 		} );
+	},
+
+	pagination( container, config ) {
+		const widgetConfig = {
+			container,
+			padding: config.padding || 3,
+		};
+
+		if ( Number.isFinite( Number( config.totalPages ) ) ) {
+			widgetConfig.totalPages = Number( config.totalPages );
+		}
+
+		return pagination( widgetConfig );
 	},
 
 	stats( container ) {
@@ -293,7 +334,10 @@ function initInstance( container ) {
 			}
 		}
 
-		widgets.push( factory( el, widgetConfig ) );
+		const widget = factory( el, widgetConfig );
+		if ( widget ) {
+			widgets.push( widget );
+		}
 	} );
 
 	search.addWidgets( widgets );

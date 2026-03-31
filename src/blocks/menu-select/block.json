@@ -15,6 +15,7 @@
 		"metadata": { "type": "object" },
 		"attribute": { "type": "string", "default": "post_type" },
 		"label": { "type": "string", "default": "" },
+		"hideWhenEmpty": { "type": "boolean", "default": true },
 		"limit": { "type": "number", "default": 10 },
 		"sortBy": {
 			"type": "array",

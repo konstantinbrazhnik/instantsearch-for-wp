@@ -27,6 +27,7 @@ class Blocks {
 		'instantsearch',
 		'search-box',
 		'hits',
+		'hits-per-page',
 		'refinement-list',
 		'pagination',
 		'stats',
