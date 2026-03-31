@@ -7,6 +7,7 @@ import {
 	RangeControl,
 	SelectControl,
 	Notice,
+	ExternalLink,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -16,6 +17,7 @@ const ALLOWED_BLOCKS = [
 	'instantsearch-for-wp/search-box',
 	'instantsearch-for-wp/hits',
 	'instantsearch-for-wp/hits-per-page',
+	'instantsearch-for-wp/configure',
 	'instantsearch-for-wp/refinement-list',
 	'instantsearch-for-wp/pagination',
 	'instantsearch-for-wp/stats',
@@ -149,6 +151,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				</PanelBody>
 
 				<PanelBody title={ __( 'Search Parameters', 'instantsearch-for-wp' ) } initialOpen={ false }>
+					<p style={ { marginTop: 0 } }>
+						<ExternalLink href="https://www.algolia.com/doc/api-reference/api-parameters/attributesToRetrieve/">
+							{ __( 'Reference: Algolia search attributes documentation', 'instantsearch-for-wp' ) }
+						</ExternalLink>
+					</p>
 					<RangeControl
 						label={ __( 'Hits per page', 'instantsearch-for-wp' ) }
 						value={ hitsPerPage }

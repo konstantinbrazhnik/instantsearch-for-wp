@@ -1,0 +1,69 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "instantsearch-for-wp/configure",
+	"version": "1.0.0",
+	"title": "Configure Override",
+	"description": "Overrides InstantSearch configure parameters for this block instance.",
+	"category": "instantsearch-for-wp",
+	"icon": "admin-settings",
+	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
+	"keywords": [ "configure", "search parameters", "override", "instantsearch" ],
+	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
+	"attributes": {
+		"metadata": { "type": "object" },
+		"hitsPerPage": {
+			"type": "number",
+			"default": 20
+		},
+		"attributesToRetrieve": {
+			"type": "string",
+			"default": ""
+		},
+		"attributesToNotRetrieve": {
+			"type": "string",
+			"default": ""
+		},
+		"restrictSearchableAttributes": {
+			"type": "string",
+			"default": ""
+		},
+		"filters": {
+			"type": "string",
+			"default": ""
+		},
+		"distinct": {
+			"type": "boolean",
+			"default": false
+		},
+		"distinctCount": {
+			"type": "number",
+			"default": 1
+		},
+		"analytics": {
+			"type": "boolean",
+			"default": true
+		},
+		"clickAnalytics": {
+			"type": "boolean",
+			"default": false
+		},
+		"highlightPreTag": {
+			"type": "string",
+			"default": "<mark>"
+		},
+		"highlightPostTag": {
+			"type": "string",
+			"default": "</mark>"
+		},
+		"snippetAttributes": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": { "html": false, "spacing": { "margin": true } },
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"render": "file:./render.php"
+}

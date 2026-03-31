@@ -24,6 +24,36 @@ import {
 	configure,
 } from 'instantsearch.js/es/widgets';
 
+const BLOCK_VISIBILITY_HIDE_CLASS_PREFIX = 'block-visibility-hide-';
+
+function isHiddenByBlockVisibility( element ) {
+	if ( ! element || ! element.classList || typeof window === 'undefined' || ! document.body ) {
+		return false;
+	}
+
+	const visibilityClasses = Array.from( element.classList ).filter( ( className ) =>
+		className.startsWith( BLOCK_VISIBILITY_HIDE_CLASS_PREFIX )
+	);
+
+	if ( visibilityClasses.length === 0 ) {
+		return false;
+	}
+
+	// Block Visibility uses CSS media queries for screen-size controls.
+	// Probe those classes on a temporary element to determine current visibility.
+	const probe = document.createElement( 'div' );
+	probe.className = visibilityClasses.join( ' ' );
+	probe.style.position = 'absolute';
+	probe.style.visibility = 'hidden';
+	probe.style.pointerEvents = 'none';
+	document.body.appendChild( probe );
+
+	const isHidden = window.getComputedStyle( probe ).display === 'none';
+	probe.remove();
+
+	return isHidden;
+}
+
 function withFacetPanel( widgetFactory, container, config, widgetOptions ) {
 	const label = config.label || config.attribute || '';
 	const hideWhenEmpty = config.hideWhenEmpty !== false;
@@ -167,6 +197,18 @@ const WIDGET_FACTORIES = {
 		} );
 	},
 
+	configure( container, config ) {
+		if ( ! config || typeof config !== 'object' || Array.isArray( config ) ) {
+			return null;
+		}
+
+		if ( Object.keys( config ).length === 0 ) {
+			return null;
+		}
+
+		return configure( config );
+	},
+
 	hitsPerPage( container, config ) {
 		const items = Array.isArray( config.items )
 			? config.items.filter( ( item ) => Number.isFinite( Number( item?.value ) ) && Number( item.value ) > 0 ).map( ( item ) => ( {
@@ -245,6 +287,10 @@ const WIDGET_FACTORIES = {
  * @param {HTMLElement} container The .isfwp-block-instance element.
  */
 function initInstance( container ) {
+	if ( isHiddenByBlockVisibility( container ) ) {
+		return;
+	}
+
 	const configEl = container.querySelector( '.isfwp-block-config' );
 	if ( ! configEl ) return;
 
@@ -277,6 +323,10 @@ function initInstance( container ) {
 	// Allow a child hits widget to override hitsPerPage at the widget level.
 	let hitsPerPage = config.hitsPerPage || 20;
 	container.querySelectorAll( '[data-isfwp-widget="hits"]' ).forEach( ( el ) => {
+		if ( isHiddenByBlockVisibility( el ) ) {
+			return;
+		}
+
 		if ( el.dataset.isfwpConfig ) {
 			try {
 				const hitsConfig = JSON.parse( el.dataset.isfwpConfig );
@@ -320,6 +370,10 @@ function initInstance( container ) {
 
 	// Discover and mount child widget containers.
 	container.querySelectorAll( '[data-isfwp-widget]' ).forEach( ( el ) => {
+		if ( isHiddenByBlockVisibility( el ) ) {
+			return;
+		}
+
 		const widgetType = el.dataset.isfwpWidget;
 		const factory = WIDGET_FACTORIES[ widgetType ];
 
