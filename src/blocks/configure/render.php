@@ -8,7 +8,14 @@
  * block visibility controls/plugins.
  *
  * @var array $attributes Block attributes.
+ * @var \WP_Block $block  Block instance.
  */
+
+$instance_id = '';
+
+if ( isset( $block ) && $block instanceof \WP_Block ) {
+	$instance_id = (string) ( $block->context['instantsearch/instanceId'] ?? '' );
+}
 
 // Parse comma-separated attributes exactly like the main container block.
 $parse_csv = static function( string $val ): array {
@@ -38,8 +45,6 @@ $config_data = [
 		: false,
 	'analytics'        => (bool) ( $attributes['analytics'] ?? true ),
 	'clickAnalytics'   => (bool) ( $attributes['clickAnalytics'] ?? false ),
-	'highlightPreTag'  => $attributes['highlightPreTag'] ?? '<mark>',
-	'highlightPostTag' => $attributes['highlightPostTag'] ?? '</mark>',
 ];
 
 if ( ! empty( $attributes['filters'] ) ) {
@@ -56,6 +61,19 @@ if ( ! empty( $restrict_searchable ) ) {
 
 if ( ! empty( $snippet_attrs_raw ) ) {
 	$config_data['snippetAttributes'] = $snippet_attrs_raw;
+}
+
+$custom_api_key = trim( (string) ( $attributes['customApiKey'] ?? '' ) );
+
+if ( '' !== $custom_api_key && '' !== $instance_id ) {
+	add_filter(
+		"instantsearch_container_config_{$instance_id}",
+		static function( array $container_config ) use ( $custom_api_key ): array {
+			$container_config['apiKey'] = $custom_api_key;
+
+			return $container_config;
+		}
+	);
 }
 
 $config = wp_json_encode( $config_data );

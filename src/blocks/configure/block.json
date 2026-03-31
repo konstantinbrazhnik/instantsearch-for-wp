@@ -49,15 +49,11 @@
 			"type": "boolean",
 			"default": false
 		},
-		"highlightPreTag": {
-			"type": "string",
-			"default": "<mark>"
-		},
-		"highlightPostTag": {
-			"type": "string",
-			"default": "</mark>"
-		},
 		"snippetAttributes": {
+			"type": "string",
+			"default": ""
+		},
+		"customApiKey": {
 			"type": "string",
 			"default": ""
 		}

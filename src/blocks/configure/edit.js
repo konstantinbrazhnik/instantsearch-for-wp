@@ -22,9 +22,8 @@ export default function Edit( { attributes, setAttributes } ) {
 		distinctCount,
 		analytics,
 		clickAnalytics,
-		highlightPreTag,
-		highlightPostTag,
 		snippetAttributes,
+		customApiKey,
 	} = attributes;
 
 	return (
@@ -39,6 +38,13 @@ export default function Edit( { attributes, setAttributes } ) {
 							{ __( 'Reference: Algolia search attributes documentation', 'instantsearch-for-wp' ) }
 						</ExternalLink>
 					</p>
+					<TextControl
+						label={ __( 'Search-Only API Key override', 'instantsearch-for-wp' ) }
+						value={ customApiKey }
+						onChange={ ( val ) => setAttributes( { customApiKey: val } ) }
+						type="password"
+						help={ __( 'Optional. If set, this visible Configure block will override the API key used by this InstantSearch instance.', 'instantsearch-for-wp' ) }
+					/>
 					<TextControl
 						label={ __( 'Label', 'instantsearch-for-wp' ) }
 						value={ blockMetadata.name ?? '' }
@@ -118,18 +124,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						checked={ clickAnalytics }
 						onChange={ ( val ) => setAttributes( { clickAnalytics: val } ) }
 						help={ __( 'Enable click analytics for conversion tracking.', 'instantsearch-for-wp' ) }
-					/>
-					<TextControl
-						label={ __( 'Highlight pre-tag', 'instantsearch-for-wp' ) }
-						value={ highlightPreTag }
-						onChange={ ( val ) => setAttributes( { highlightPreTag: val } ) }
-						help={ __( 'Opening HTML tag wrapping highlighted text (default: <mark>).', 'instantsearch-for-wp' ) }
-					/>
-					<TextControl
-						label={ __( 'Highlight post-tag', 'instantsearch-for-wp' ) }
-						value={ highlightPostTag }
-						onChange={ ( val ) => setAttributes( { highlightPostTag: val } ) }
-						help={ __( 'Closing HTML tag wrapping highlighted text (default: </mark>).', 'instantsearch-for-wp' ) }
 					/>
 					<TextareaControl
 						label={ __( 'Snippet attributes', 'instantsearch-for-wp' ) }
