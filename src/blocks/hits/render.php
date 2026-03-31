@@ -7,10 +7,16 @@
  * @var \WP_Block $block     Block instance.
  */
 
-$custom_class = sanitize_html_class( $attributes['customClass'] ?? '' );
+$custom_class  = sanitize_html_class( $attributes['customClass'] ?? '' );
+$hit_template  = $attributes['hitTemplate'] ?? '';
+$hits_per_page = intval( $attributes['hitsPerPage'] ?? 10 );
+
 $config = wp_json_encode( [
-	'showImage'   => (bool) ( $attributes['showImage'] ?? false ),
+	'showImage'   => (bool) ( $attributes['showImage'] ?? true ),
 	'showExcerpt' => (bool) ( $attributes['showExcerpt'] ?? true ),
+	'imageSize'   => sanitize_text_field( $attributes['imageSize'] ?? 'thumbnail' ),
+	'hitTemplate' => $hit_template,
+	'hitsPerPage' => $hits_per_page,
 ] );
 
 $extra_classes = $custom_class ? " $custom_class" : '';
