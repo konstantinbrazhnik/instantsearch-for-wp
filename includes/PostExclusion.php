@@ -34,6 +34,13 @@ class PostExclusion {
 	const META_KEY = '_instantsearch_exclude';
 
 	/**
+	 * Post meta key used to store whether search results should show excerpt.
+	 *
+	 * @var string
+	 */
+	const META_KEY_SHOW_EXCERPT = '_instantsearch_show_excerpt_in_results';
+
+	/**
 	 * Sentinel value meaning "exclude from every index".
 	 *
 	 * @var string
@@ -110,6 +117,22 @@ class PostExclusion {
 						return current_user_can( 'edit_posts' );
 					},
 					'sanitize_callback' => array( __CLASS__, 'sanitize_exclusions' ),
+				)
+			);
+
+			register_post_meta(
+				$post_type,
+				self::META_KEY_SHOW_EXCERPT,
+				array(
+					'type'              => 'boolean',
+					'description'       => 'Whether search results should show the post excerpt instead of content.',
+					'single'            => true,
+					'default'           => false,
+					'show_in_rest'      => true,
+					'auth_callback'     => function () {
+						return current_user_can( 'edit_posts' );
+					},
+					'sanitize_callback' => array( __CLASS__, 'sanitize_show_excerpt' ),
 				)
 			);
 		}
@@ -226,8 +249,21 @@ class PostExclusion {
 		}
 
 		$exclude_all = in_array( self::EXCLUDE_ALL, $exclusions, true );
+		$show_excerpt = self::show_excerpt_in_results( $post->ID );
 		?>
 		<div class="instantsearch-exclusion-metabox">
+			<p>
+				<label>
+					<input
+						type="checkbox"
+						name="instantsearch_show_excerpt_in_results"
+						value="1"
+						<?php checked( $show_excerpt ); ?>
+					/>
+					<strong><?php esc_html_e( 'Show excerpt in search results', 'instantsearch-for-wp' ); ?></strong>
+				</label>
+			</p>
+			<hr />
 			<p>
 				<label>
 					<input
@@ -342,6 +378,9 @@ class PostExclusion {
 
 		$previous_exclusions = self::get_exclusions( $post_id );
 
+		$show_excerpt = ! empty( $_POST['instantsearch_show_excerpt_in_results'] );
+		self::set_show_excerpt_in_results( $post_id, $show_excerpt );
+
 		if ( ! empty( $_POST['instantsearch_exclude_all'] ) ) {
 			$new_exclusions = array( self::EXCLUDE_ALL );
 		} else {
@@ -444,6 +483,11 @@ class PostExclusion {
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
+						'show_excerpt' => array(
+							'required'          => false,
+							'type'              => 'boolean',
+							'sanitize_callback' => array( __CLASS__, 'sanitize_show_excerpt' ),
+						),
 						'exclusions' => array(
 							'required'          => true,
 							'type'              => 'array',
@@ -483,6 +527,7 @@ class PostExclusion {
 		return rest_ensure_response(
 			array(
 				'exclusions' => self::get_exclusions( $post_id ),
+				'show_excerpt' => self::show_excerpt_in_results( $post_id ),
 				'indices'    => $this->get_post_indices( $post->post_type ),
 			)
 		);
@@ -499,6 +544,12 @@ class PostExclusion {
 		$post       = get_post( $post_id );
 		$exclusions = (array) $request->get_param( 'exclusions' );
 
+		if ( null === $request->get_param( 'show_excerpt' ) ) {
+			$show_excerpt = self::show_excerpt_in_results( $post_id );
+		} else {
+			$show_excerpt = self::sanitize_show_excerpt( $request->get_param( 'show_excerpt' ) );
+		}
+
 		$previous_exclusions = self::get_exclusions( $post_id );
 
 		// Validate: allow only valid index slugs or the __all__ sentinel.
@@ -509,6 +560,7 @@ class PostExclusion {
 		$exclusions  = array_values( array_intersect( $exclusions, $valid_slugs ) );
 
 		self::set_exclusions( $post_id, $exclusions );
+		self::set_show_excerpt_in_results( $post_id, $show_excerpt );
 
 		// Queue de-indexing for newly-excluded indices.
 		$this->maybe_queue_deindex( $post_id, $previous_exclusions, $exclusions );
@@ -516,6 +568,7 @@ class PostExclusion {
 		return rest_ensure_response(
 			array(
 				'exclusions' => self::get_exclusions( $post_id ),
+				'show_excerpt' => self::show_excerpt_in_results( $post_id ),
 				'indices'    => $this->get_post_indices( $post->post_type ),
 			)
 		);
@@ -867,6 +920,33 @@ class PostExclusion {
 	}
 
 	/**
+	 * Check whether search results should show the post excerpt.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool
+	 */
+	public static function show_excerpt_in_results( $post_id ) {
+		return (bool) get_post_meta( $post_id, self::META_KEY_SHOW_EXCERPT, true );
+	}
+
+	/**
+	 * Persist excerpt display preference for a post.
+	 *
+	 * @param int   $post_id       Post ID.
+	 * @param mixed $show_excerpt  Whether excerpt should be shown in search results.
+	 * @return void
+	 */
+	public static function set_show_excerpt_in_results( $post_id, $show_excerpt ) {
+		$show_excerpt = self::sanitize_show_excerpt( $show_excerpt );
+
+		if ( $show_excerpt ) {
+			update_post_meta( $post_id, self::META_KEY_SHOW_EXCERPT, true );
+		} else {
+			delete_post_meta( $post_id, self::META_KEY_SHOW_EXCERPT );
+		}
+	}
+
+	/**
 	 * Check whether a post is excluded from a given Index.
 	 *
 	 * @param int        $post_id Post ID.
@@ -959,6 +1039,16 @@ class PostExclusion {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Sanitize boolean-style values for excerpt display preference.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return bool
+	 */
+	public static function sanitize_show_excerpt( $value ) {
+		return rest_sanitize_boolean( $value );
 	}
 
 	/**
