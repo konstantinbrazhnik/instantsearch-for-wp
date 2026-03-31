@@ -68,6 +68,7 @@
 	box-sizing: border-box;
 	color: var( --isfwp-color-text );
 	background: var( --isfwp-color-surface-alt );
+	width: auto;
 }
 
 .isfwp-block-instance .ais-Pagination-list {
@@ -116,7 +117,7 @@
 }
 
 .isfwp-block-instance .ais-Panel-header {
-	margin: 0 0 var( --isfwp-space-sm );
+	margin: 0 0 var( --isfwp-space-xs );
 	font-size: var( --isfwp-font-size );
 	font-weight: 600;
 	line-height: 1.3;

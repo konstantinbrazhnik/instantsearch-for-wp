@@ -9,7 +9,11 @@ import {
 import { __ } from '@wordpress/i18n';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { label, items = [] } = attributes;
+	const { label, appendLabelToOptions = false, items = [] } = attributes;
+
+	const optionLabelSuffix = appendLabelToOptions && label
+		? label.charAt( 0 ).toLowerCase() + label.slice( 1 )
+		: '';
 
 	function updateItem( index, field, value ) {
 		const next = items.map( ( item, itemIndex ) => {
@@ -56,7 +60,13 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Label', 'instantsearch-for-wp' ) }
 						value={ label }
 						onChange={ ( value ) => setAttributes( { label: value } ) }
-						help={ __( 'Displayed above the page-size select control.', 'instantsearch-for-wp' ) }
+						help={ __( 'Used above the select, or appended to option labels when enabled below.', 'instantsearch-for-wp' ) }
+					/>
+					<ToggleControl
+						label={ __( 'Append label to option labels', 'instantsearch-for-wp' ) }
+						checked={ appendLabelToOptions }
+						onChange={ ( value ) => setAttributes( { appendLabelToOptions: value } ) }
+						help={ __( 'When enabled, hides the standalone label and renders options like "10 results per page".', 'instantsearch-for-wp' ) }
 					/>
 					{ items.map( ( item, index ) => (
 						<VStack key={ index } style={ { marginBottom: '1rem', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '4px' } }>
@@ -99,10 +109,16 @@ export default function Edit( { attributes, setAttributes } ) {
 
 			<div { ...useBlockProps() }>
 				<div className="isfwp-widget-preview">
-					<div className="isfwp-widget-preview__label">{ label || __( 'Hits Per Page', 'instantsearch-for-wp' ) }</div>
+					{ ! appendLabelToOptions && (
+						<div className="isfwp-widget-preview__label">{ label || __( 'Hits Per Page', 'instantsearch-for-wp' ) }</div>
+					) }
 					<select style={ { padding: '0.375rem 0.75rem', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '0.875rem', background: '#fff', width: '100%' } } disabled>
 						{ items.length > 0
-							? items.map( ( item, index ) => <option key={ index }>{ item.label || item.value }</option> )
+							? items.map( ( item, index ) => {
+								const baseLabel = item.label || item.value;
+								const previewLabel = optionLabelSuffix ? `${ baseLabel } ${ optionLabelSuffix }` : baseLabel;
+								return <option key={ index }>{ previewLabel }</option>;
+							} )
 							: <option>{ __( '— Configure page sizes —', 'instantsearch-for-wp' ) }</option>
 						}
 					</select>
