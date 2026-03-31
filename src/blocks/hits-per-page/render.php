@@ -7,6 +7,7 @@
 
 $raw_items = $attributes['items'] ?? array();
 $items     = array();
+$append_label_to_options = ! empty( $attributes['appendLabelToOptions'] );
 
 foreach ( (array) $raw_items as $item ) {
 	if ( ! is_array( $item ) ) {
@@ -46,13 +47,14 @@ if ( ! $has_default ) {
 $config = wp_json_encode(
 	array(
 		'label' => sanitize_text_field( $attributes['label'] ?? 'Results per page' ),
+		'appendLabelToOptions' => $append_label_to_options,
 		'items' => $items,
 	)
 );
 $label = sanitize_text_field( $attributes['label'] ?? 'Results per page' );
 ?>
 <div <?php echo get_block_wrapper_attributes(); // phpcs:ignore ?> >
-	<?php if ( '' !== $label ) : ?>
+	<?php if ( ! $append_label_to_options && '' !== $label ) : ?>
 		<p class="isfwp-hits-per-page__label"><strong><?php echo esc_html( $label ); ?></strong></p>
 	<?php endif; ?>
 	<div

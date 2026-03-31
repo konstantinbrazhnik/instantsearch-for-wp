@@ -210,12 +210,20 @@ const WIDGET_FACTORIES = {
 	},
 
 	hitsPerPage( container, config ) {
+		const optionLabelSuffix = config.appendLabelToOptions && config.label
+			? config.label.charAt( 0 ).toLowerCase() + config.label.slice( 1 )
+			: '';
+
 		const items = Array.isArray( config.items )
-			? config.items.filter( ( item ) => Number.isFinite( Number( item?.value ) ) && Number( item.value ) > 0 ).map( ( item ) => ( {
-				label: item.label || String( item.value ),
-				value: Number( item.value ),
-				default: item.default === true,
-			} ) )
+			? config.items.filter( ( item ) => Number.isFinite( Number( item?.value ) ) && Number( item.value ) > 0 ).map( ( item ) => {
+				const baseLabel = item.label || String( item.value );
+
+				return {
+					label: optionLabelSuffix ? `${ baseLabel } ${ optionLabelSuffix }` : baseLabel,
+					value: Number( item.value ),
+					default: item.default === true,
+				};
+			} )
 			: [];
 
 		if ( items.length === 0 ) {

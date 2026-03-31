@@ -210,20 +210,11 @@ class AlgoliaConnector extends AbstractConnector {
 			$record = $this->format_post( $post_id, $index );
 
 			if ( $record ) {
-				$content_chunks = $this->chunk_text_by_sentences( $record['contentForSearch'] ?? '', 500, true );
+				$content_chunks = $this->chunk_text_by_sentences( $record['content'] ?? '', 500, true );
 				if ( count( $content_chunks ) > 1 ) {
-					$show_excerpt = ! empty( $record['showExcerptInSearchResults'] );
-
 					foreach ( $content_chunks as $chunk ) {
 						$chunked_record            = $record;
-						$chunked_record['contentForSearch'] = $chunk;
-
-						if ( $show_excerpt ) {
-							$chunked_record['excerpt'] = $chunk;
-						} else {
-							$chunked_record['content'] = $chunk;
-						}
-
+						$chunked_record['content'] = $chunk;
 						$records[]                 = $chunked_record;
 					}
 					continue;
@@ -263,24 +254,15 @@ class AlgoliaConnector extends AbstractConnector {
 		$now = current_time( 'mysql' );
 		$post_content = wp_strip_all_tags( apply_filters( 'the_content', $post->post_content ) );
 		$post_excerpt = wp_strip_all_tags( (string) $post->post_excerpt );
-		$show_excerpt = PostExclusion::show_excerpt_in_results( $post->ID );
-
-		if ( $show_excerpt && '' !== $post_excerpt ) {
-			$display_content = $post_excerpt;
-		} else {
-			$display_content = $post_content;
-		}
 
 		$record = array(
 			'postID'         => $post->ID,
 			'title'          => wp_strip_all_tags( apply_filters( 'the_title', $post->post_title ) ),
-			'content'        => $display_content,
+			'content'        => $post_content,
 			'excerpt'        => $post_excerpt,
-			'contentForSearch' => $post_content,
-			'showExcerptInSearchResults' => $show_excerpt,
 			'date'           => $post->post_date,
 			'date_ts'        => strtotime( $post->post_date_gmt ),
-			'post_type_slug' => $post->post_type,
+			'post_type_slug' => sanitize_key( $post->post_type ),
 			'post_type'      => get_post_type_object( $post->post_type )->label,
 			'indexed_at'     => $now,
 			'indexed_at_ts'  => strtotime( $now ),
@@ -290,7 +272,6 @@ class AlgoliaConnector extends AbstractConnector {
 		if ( 'attachment' === $post->post_type && 'application/pdf' === get_post_mime_type( $post->ID ) ) {
 			$pdf_content = PDFTextExtractor::get_instance()->get_attachment_text( $post->ID );
 			$record['content'] = $pdf_content;
-			$record['contentForSearch'] = $pdf_content;
 			$record['mime_type'] = 'application/pdf';
 		}
 
@@ -405,7 +386,7 @@ class AlgoliaConnector extends AbstractConnector {
 		$index      = json_decode( $index_post->post_content, true );
 		$index_name = $this->index_name( $index_post->post_name );
 
-		$searchable_attributes = array( 'title', 'contentForSearch', 'author', 'post_type' );
+		$searchable_attributes = array( 'title', 'content', 'author', 'post_type' );
 		$facet_attributes 	   = array( 'post_type' );
 
 		// Allow filtering of taxonomies to be used as facets.
@@ -416,7 +397,7 @@ class AlgoliaConnector extends AbstractConnector {
 		}
 
 		$searchable_attributes  = apply_filters( 'instantsearch_searchable_attributes', $searchable_attributes, $index['name'] ?? 'search' );
-		$filter_only_attributes = apply_filters( 'instantsearch_filterable_attributes', array( 'postID' ), $index['name'] ?? 'search' );
+		$filter_only_attributes = apply_filters( 'instantsearch_filterable_attributes', array( 'postID', 'post_type_slug' ), $index['name'] ?? 'search' );
 		$facet_attributes       = apply_filters( 'instantsearch_facet_attributes', $facet_attributes, $index['name'] ?? 'search' );
 		$index_name_for_filter  = $index['name'] ?? 'search';
 
@@ -427,7 +408,7 @@ class AlgoliaConnector extends AbstractConnector {
 		);
 		$attributes_to_retrieve_exclude = apply_filters(
 			'instantsearch_attributes_to_retrieve_exclude',
-			array( 'indexed_at', 'indexed_at_ts', 'date_ts', 'contentForSearch' ),
+			array( 'indexed_at', 'indexed_at_ts', 'date_ts' ),
 			$index_name_for_filter
 		);
 		$unretrievable_attributes = apply_filters(
@@ -474,7 +455,7 @@ class AlgoliaConnector extends AbstractConnector {
 			'attributeForDistinct'   => 'postID',
 			// Set searchable attributes as highligthtedAttributes to ensure they are highlighted in results.
 			'attributesToHighlight'  => $searchable_attributes,
-			'attributesToSnippet'    => apply_filters( 'instantsearch_attributes_to_snippet', array( 'content', 'contentForSearch','excerpt' ), $index['name'] ?? 'search' ),
+			'attributesToSnippet'    => apply_filters( 'instantsearch_attributes_to_snippet', array( 'content', 'excerpt' ), $index['name'] ?? 'search' ),
 			'removeWordsIfNoResults' => apply_filters( 'instantsearch_remove_words_if_no_results', 'allOptional', $index['name'] ?? 'search' ),
 			'ranking'                => apply_filters(
 				'instantsearch_ranking',

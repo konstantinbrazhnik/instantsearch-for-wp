@@ -73,6 +73,8 @@
 	box-sizing: border-box;
 	color: var( --isfwp-color-text );
 	background: var( --isfwp-color-surface-alt );
+	
+	width: auto;
 
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
@@ -136,7 +138,7 @@
 }
 
 .isfwp-block-instance .ais-Panel-header {
-	margin: 0 0 var( --isfwp-space-sm );
+	margin: 0 0 var( --isfwp-space-xs );
 	font-size: var( --isfwp-font-size );
 	font-weight: 600;
 	line-height: 1.3;
