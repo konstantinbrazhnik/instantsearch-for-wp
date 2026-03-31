@@ -14,6 +14,7 @@
 	"attributes": {
 		"metadata": { "type": "object" },
 		"placeholder": { "type": "string", "default": "Search…" },
+		"debounce": { "type": "number", "default": 0 },
 		"autofocus": { "type": "boolean", "default": false },
 		"showSubmit": { "type": "boolean", "default": true },
 		"showReset": { "type": "boolean", "default": true }

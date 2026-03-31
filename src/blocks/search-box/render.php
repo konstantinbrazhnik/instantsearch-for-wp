@@ -9,6 +9,7 @@
 
 $args = [
 	'placeholder' => $attributes['placeholder'] ?? 'Search…',
+	'debounce'    => max( 0, (int) ( $attributes['debounce'] ?? 0 ) ),
 	'autofocus'   => (bool) ( $attributes['autofocus'] ?? false ),
 	'showSubmit'  => (bool) ( $attributes['showSubmit'] ?? true ),
 	'showReset'   => (bool) ( $attributes['showReset'] ?? true ),

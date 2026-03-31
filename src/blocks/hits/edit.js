@@ -46,7 +46,7 @@ const TOKEN_REFERENCE = [
 ];
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { showImage, imageSize, hitsPerPage, hitTemplate } = attributes;
+	const { showImage, imageSize, hitsPerPage, tabletColumns, columns, hitTemplate } = attributes;
 	const [ customField, setCustomField ] = useState( '' );
 	const templateWrapRef = useRef( null );
 
@@ -174,6 +174,24 @@ export default function Edit( { attributes, setAttributes } ) {
 						max={ 100 }
 						step={ 1 }
 					/>
+					<RangeControl
+						label={ __( 'Tablet columns', 'instantsearch-for-wp' ) }
+						value={ tabletColumns }
+						onChange={ ( val ) => setAttributes( { tabletColumns: val } ) }
+						min={ 1 }
+						max={ 4 }
+						step={ 1 }
+						help={ __( 'Controls how many result columns render on tablet screens.', 'instantsearch-for-wp' ) }
+					/>
+					<RangeControl
+						label={ __( 'Desktop columns', 'instantsearch-for-wp' ) }
+						value={ columns }
+						onChange={ ( val ) => setAttributes( { columns: val } ) }
+						min={ 1 }
+						max={ 6 }
+						step={ 1 }
+						help={ __( 'Controls how many result columns render on desktop screens.', 'instantsearch-for-wp' ) }
+					/>
 				</PanelBody>
 
 				<PanelBody title={ __( 'Token Reference', 'instantsearch-for-wp' ) } initialOpen={ false }>
@@ -193,8 +211,15 @@ export default function Edit( { attributes, setAttributes } ) {
 					<div className="isfwp-widget-preview__label">
 						{ __( 'Search Results (Hits)', 'instantsearch-for-wp' ) }
 					</div>
-					{ [ 1, 2, 3 ].map( ( i ) => (
-						<div key={ i } className="isfwp-hit-preview">
+					<div
+						style={ {
+							display: 'grid',
+							gap: '1rem',
+							gridTemplateColumns: `repeat(${ columns || 3 }, minmax(0, 1fr))`,
+						} }
+					>
+						{ [ 1, 2, 3 ].map( ( i ) => (
+							<div key={ i } className="isfwp-hit-preview">
 							{ showImage && (
 								<div className="isfwp-hit-preview__image" />
 							) }
@@ -204,7 +229,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								<div className="isfwp-widget-preview__mock-hit isfwp-widget-preview__mock-hit--short" />
 							</div>
 						</div>
-					) ) }
+						) ) }
+					</div>
 					<div className="isfwp-hit-preview__template-notice">
 						{ __( 'Custom template active', 'instantsearch-for-wp' ) }
 					</div>

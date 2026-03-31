@@ -3,7 +3,7 @@ import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { placeholder, autofocus, showSubmit, showReset } = attributes;
+	const { placeholder, debounce, autofocus, showSubmit, showReset } = attributes;
 
 	return (
 		<>
@@ -13,6 +13,20 @@ export default function Edit( { attributes, setAttributes } ) {
 						label={ __( 'Placeholder text', 'instantsearch-for-wp' ) }
 						value={ placeholder }
 						onChange={ ( val ) => setAttributes( { placeholder: val } ) }
+					/>
+					<TextControl
+						label={ __( 'Debounce (ms)', 'instantsearch-for-wp' ) }
+						type="number"
+						help={ __( 'Set to 0 to disable search-as-you-type and only search when the user presses Enter.', 'instantsearch-for-wp' ) }
+						value={ debounce ?? 0 }
+						onChange={ ( val ) => {
+							const parsed = Number.parseInt( val, 10 );
+							setAttributes( {
+								debounce: Number.isNaN( parsed ) ? 0 : Math.max( 0, parsed ),
+							} );
+						} }
+						min={ 0 }
+						step={ 50 }
 					/>
 					<ToggleControl
 						label={ __( 'Auto-focus on load', 'instantsearch-for-wp' ) }

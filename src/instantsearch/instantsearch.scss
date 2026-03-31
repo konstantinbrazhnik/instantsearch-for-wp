@@ -1,5 +1,5 @@
 /* Import the InstantSearch styles */
-@import '../styles/tokens';
+@use '../styles/tokens';
 @import 'instantsearch.css/themes/reset.css';
 // @import 'instantsearch.css/components/chat.css'; // Not available in installed version
 

@@ -1,6 +1,6 @@
 /* Frontend styles for the InstantSearch container block */
 
-@import '../../styles/tokens';
+@use '../../styles/tokens';
 
 .isfwp-block-instance {
 	position: relative;
@@ -12,11 +12,23 @@
 /* Import base InstantSearch styles */
 .isfwp-block-instance .ais-Hits-list {
 	display: grid;
-	grid-template-columns: repeat( auto-fill, minmax( 280px, 1fr ) );
+	grid-template-columns: minmax( 0, 1fr );
 	gap: var( --isfwp-space-lg );
 	list-style: none;
 	margin: 0;
 	padding: 0;
+}
+
+@media ( min-width: 768px ) {
+	.isfwp-block-instance .ais-Hits-list {
+		grid-template-columns: repeat( var( --isfwp-hits-tablet-columns, 2 ), minmax( 0, 1fr ) );
+	}
+}
+
+@media ( min-width: 1024px ) {
+	.isfwp-block-instance .ais-Hits-list {
+		grid-template-columns: repeat( var( --isfwp-hits-columns, 3 ), minmax( 0, 1fr ) );
+	}
 }
 
 .isfwp-block-instance .ais-Hits-item {
@@ -181,6 +193,7 @@
 	box-sizing: border-box;
 	color: var( --isfwp-color-text );
 	background: var( --isfwp-color-surface );
+	width: 100%;
 }
 
 .isfwp-block-instance mark {

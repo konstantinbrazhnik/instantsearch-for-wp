@@ -10,6 +10,8 @@
 $custom_class  = sanitize_html_class( $attributes['customClass'] ?? '' );
 $hit_template  = $attributes['hitTemplate'] ?? '';
 $hits_per_page = intval( $attributes['hitsPerPage'] ?? 10 );
+$tablet_columns = max( 1, min( 4, intval( $attributes['tabletColumns'] ?? 2 ) ) );
+$columns       = max( 1, min( 6, intval( $attributes['columns'] ?? 3 ) ) );
 $custom_class = sanitize_html_class( $attributes['customClass'] ?? '' );
 
 $hit_template = $attributes['hitTemplate'] ?? '';
@@ -32,9 +34,10 @@ $config = wp_json_encode( [
 ] );
 
 $extra_classes = $custom_class ? " $custom_class" : '';
+$wrapper_styles = sprintf( '--isfwp-hits-tablet-columns: %d; --isfwp-hits-columns: %d;', $tablet_columns, $columns );
 ?>
 <div
-	<?php echo get_block_wrapper_attributes( [ 'class' => 'isfwp-hits-container' . $extra_classes ] ); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes( [ 'class' => 'isfwp-hits-container' . $extra_classes, 'style' => $wrapper_styles ] ); // phpcs:ignore ?>
 	data-isfwp-widget="hits"
 	data-isfwp-config="<?php echo esc_attr( $config ); ?>"
 ></div>

@@ -21,7 +21,9 @@
 			"default": "<article class=\"isfwp-hit\">\n  <a href=\"{{permalink}}\">\n    <img src=\"{{image}}\" alt=\"{{title}}\" />\n    <h3>{{{_highlightResult.title.value}}}</h3>\n    <p>{{{_highlightResult.excerpt.value}}}</p>\n  </a>\n</article>"
 		},
 		"imageSize": { "type": "string", "default": "thumbnail" },
-		"hitsPerPage": { "type": "number", "default": 10 }
+		"hitsPerPage": { "type": "number", "default": 10 },
+		"tabletColumns": { "type": "number", "default": 2 },
+		"columns": { "type": "number", "default": 3 }
 	},
 	"supports": { "html": false, "spacing": { "margin": true } },
 	"editorScript": "file:./index.js",

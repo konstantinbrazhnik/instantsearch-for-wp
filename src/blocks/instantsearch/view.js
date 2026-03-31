@@ -8,6 +8,7 @@
 
 import instantsearch from 'instantsearch.js';
 import { algoliasearch } from 'algoliasearch';
+import { applyFilters } from '@wordpress/hooks';
 import {
 	searchBox,
 	hits,
@@ -26,16 +27,64 @@ import {
  */
 const WIDGET_FACTORIES = {
 	searchBox( container, config ) {
-		return searchBox( {
+		const debounce = Number.isFinite( Number( config.debounce ) )
+			? Math.max( 0, Number( config.debounce ) )
+			: 0;
+		const searchBoxConfig = {
 			container,
 			placeholder: config.placeholder || 'Search…',
 			autofocus: config.autofocus || false,
 			showSubmit: config.showSubmit !== false,
 			showReset: config.showReset !== false,
+			searchAsYouType: debounce > 0,
+		};
+
+		if ( debounce > 0 ) {
+			let debounceTimer;
+
+			searchBoxConfig.queryHook = ( query, search ) => {
+				window.clearTimeout( debounceTimer );
+				debounceTimer = window.setTimeout( () => search( query ), debounce );
+			};
+		}
+
+		return searchBox( {
+			...searchBoxConfig,
 		} );
 	},
 
 	hits( container, config ) {
+		const instanceId = container.closest( '.isfwp-block-instance' )?.dataset.isfwpInstance || '';
+
+		// Allow themes or companion plugins to augment each hit before templates render.
+		// Global hook: isfwp.blockHit
+		// Instance hook: isfwp.blockHit.{instanceId}
+		const transformItems = ( items, { results } ) => items.map( ( hit, index ) => {
+			const filterContext = {
+				config,
+				container,
+				index,
+				instanceId,
+				results,
+			};
+
+			let transformedHit = applyFilters(
+				'isfwp.blockHit',
+				hit,
+				filterContext
+			);
+
+			if ( instanceId ) {
+				transformedHit = applyFilters(
+					`isfwp.blockHit.${ instanceId }`,
+					transformedHit,
+					filterContext
+				);
+			}
+
+			return transformedHit;
+		} );
+
 		// When a custom Mustache template string is provided, pass it directly —
 		// InstantSearch.js natively renders string templates via Hogan/Mustache.
 		const templates = config.hitTemplate
@@ -77,7 +126,7 @@ const WIDGET_FACTORIES = {
 				},
 			};
 
-		return hits( { container, templates } );
+		return hits( { container, templates, transformItems } );
 	},
 
 	refinementList( container, config ) {
@@ -121,19 +170,30 @@ const WIDGET_FACTORIES = {
 	},
 
 	currentRefinements( container, config ) {
+		const excludedAttributes = Array.isArray( config.excludedAttributes )
+			? config.excludedAttributes
+			: [];
+
 		return currentRefinements( {
 			container,
-			excludedAttributes: config.excludedAttributes || [],
+			excludedAttributes,
 		} );
 	},
 
 	clearRefinements( container, config ) {
-		return clearRefinements( {
+		const widgetConfig = {
 			container,
-			includedAttributes: config.includedAttributes,
 			templates: {
 				resetLabel: config.buttonLabel || 'Clear refinements',
 			},
+		};
+
+		if ( Array.isArray( config.includedAttributes ) ) {
+			widgetConfig.includedAttributes = config.includedAttributes;
+		}
+
+		return clearRefinements( {
+			...widgetConfig,
 		} );
 	},
 };
