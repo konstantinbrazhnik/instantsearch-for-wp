@@ -10,7 +10,7 @@ import {
 	ExternalLink,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 const ALLOWED_BLOCKS = [
@@ -72,12 +72,22 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		return getEntityRecords( 'postType', 'isfwp_index', { per_page: 100, status: 'publish' } ) || [];
 	}, [] );
 
+	const hasRegisteredIndex = indexes.some( ( idx ) => idx.slug === indexName );
+	const [ useManualIndex, setUseManualIndex ] = useState( false );
+
+	useEffect( () => {
+		if ( indexName ) {
+			setUseManualIndex( ! hasRegisteredIndex );
+		}
+	}, [ hasRegisteredIndex, indexName ] );
+
 	const indexOptions = [
 		{ label: __( '— Use plugin default —', 'instantsearch-for-wp' ), value: '' },
 		...indexes.map( ( idx ) => ( {
 			label: idx.title?.rendered || idx.slug,
 			value: idx.slug,
 		} ) ),
+		{ label: __( '— Custom index —', 'instantsearch-for-wp' ), value: '__custom__' },
 	];
 
 	// Check if child blocks include at least a search-box and hits.
@@ -112,17 +122,26 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					/>
 					<SelectControl
 						label={ __( 'Index', 'instantsearch-for-wp' ) }
-						value={ indexName }
+						value={ useManualIndex ? '__custom__' : indexName }
 						options={ indexOptions }
-						onChange={ ( val ) => setAttributes( { indexName: val } ) }
-						help={ __( 'Select which index to search, or leave empty to use the plugin default.', 'instantsearch-for-wp' ) }
+						onChange={ ( val ) => {
+							if ( '__custom__' === val ) {
+								setUseManualIndex( true );
+								return;
+							}
+
+							setUseManualIndex( false );
+							setAttributes( { indexName: val } );
+						} }
+						help={ __( 'Select which index to search, choose Custom index, or leave empty to use the plugin default.', 'instantsearch-for-wp' ) }
 					/>
-					{ ! indexName && (
+					{ useManualIndex && (
 						<TextControl
 							label={ __( 'Manual index name', 'instantsearch-for-wp' ) }
 							value={ indexName }
 							onChange={ ( val ) => setAttributes( { indexName: val } ) }
 							placeholder={ __( 'e.g. my-site_posts', 'instantsearch-for-wp' ) }
+							help={ __( 'Enter an Algolia index name that is not listed above.', 'instantsearch-for-wp' ) }
 						/>
 					) }
 				</PanelBody>
