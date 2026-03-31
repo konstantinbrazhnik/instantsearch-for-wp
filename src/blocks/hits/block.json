@@ -10,11 +10,13 @@
 	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
 	"keywords": [ "results", "hits", "search results", "instantsearch" ],
 	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
 	"attributes": {
 		"metadata": { "type": "object" },
 		"showImage": { "type": "boolean", "default": false },
 		"showExcerpt": { "type": "boolean", "default": true },
-		"customClass": { "type": "string", "default": "" }
+		"customClass": { "type": "string", "default": "" },
+		"hitTemplate": { "type": "string", "default": "" }
 	},
 	"supports": { "html": false, "spacing": { "margin": true } },
 	"editorScript": "file:./index.js",

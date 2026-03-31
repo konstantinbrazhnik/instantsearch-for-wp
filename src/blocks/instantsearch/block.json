@@ -82,6 +82,9 @@
 			"default": ""
 		}
 	},
+	"providesContext": {
+		"instantsearch/instanceId": "instanceId"
+	},
 	"supports": {
 		"html": false,
 		"align": [ "wide", "full" ],

@@ -10,6 +10,7 @@
 	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
 	"keywords": [ "facet", "filter", "refinement", "taxonomy", "instantsearch" ],
 	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
 	"attributes": {
 		"metadata": { "type": "object" },
 		"attribute": { "type": "string", "default": "post_type" },

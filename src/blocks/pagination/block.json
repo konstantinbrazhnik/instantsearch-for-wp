@@ -10,6 +10,7 @@
 	"parent": [ "instantsearch-for-wp/instantsearch", "core/group", "core/column", "core/columns" ],
 	"keywords": [ "pagination", "pages", "navigation", "instantsearch" ],
 	"textdomain": "instantsearch-for-wp",
+	"usesContext": [ "instantsearch/instanceId" ],
 	"attributes": {
 		"metadata": { "type": "object" },
 		"totalPages": { "type": "number" },

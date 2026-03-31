@@ -8,9 +8,22 @@
  */
 
 $custom_class = sanitize_html_class( $attributes['customClass'] ?? '' );
+
+$hit_template = $attributes['hitTemplate'] ?? '';
+
+// Allow themes/plugins to override the hit template for all instances.
+$hit_template = apply_filters( 'instantsearch_hit_template', $hit_template, $attributes, $block );
+
+// Allow overriding for a specific container instance.
+$instance_id = $block->context['instantsearch/instanceId'] ?? '';
+if ( $instance_id ) {
+	$hit_template = apply_filters( "instantsearch_hit_template_{$instance_id}", $hit_template, $attributes, $block );
+}
+
 $config = wp_json_encode( [
 	'showImage'   => (bool) ( $attributes['showImage'] ?? false ),
 	'showExcerpt' => (bool) ( $attributes['showExcerpt'] ?? true ),
+	'hitTemplate' => $hit_template,
 ] );
 
 $extra_classes = $custom_class ? " $custom_class" : '';

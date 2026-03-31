@@ -9,7 +9,8 @@
  * @var \WP_Block $block     Block instance.
  */
 
-$instance_id = esc_attr( $attributes['instanceId'] ?? uniqid( 'isfwp-' ) );
+$instance_id = $attributes['instanceId'] ?? '';
+$wrapper_id  = $instance_id ? "isfwp-{$instance_id}" : 'isfwp-' . wp_unique_id();
 
 // Resolve credentials.
 $settings       = \InstantSearchForWP\Settings::get_settings();
@@ -77,12 +78,19 @@ if ( ! empty( $snippet_attrs_raw ) ) {
 	$config_data['snippetAttributes'] = $snippet_attrs_raw;
 }
 
+// Filter the entire config — allows themes/plugins to modify search parameters at render time.
+$config_data = apply_filters( 'instantsearch_container_config', $config_data, $instance_id, $attributes );
+if ( $instance_id ) {
+	$config_data = apply_filters( "instantsearch_container_config_{$instance_id}", $config_data, $attributes );
+}
+
 $config = wp_json_encode( $config_data );
 
 $wrapper_attrs = get_block_wrapper_attributes(
 	[
-		'id'                   => 'isfwp-instance-' . $instance_id,
+		'id'                   => $wrapper_id,
 		'class'                => 'isfwp-block-instance',
+		'data-instance-id'     => $instance_id,
 		'data-isfwp-instance'  => $instance_id,
 	]
 );
