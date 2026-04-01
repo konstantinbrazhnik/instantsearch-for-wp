@@ -33,6 +33,10 @@
 			"type": "number",
 			"default": 20
 		},
+		"enableRouting": {
+			"type": "boolean",
+			"default": true
+		},
 		"attributesToRetrieve": {
 			"type": "string",
 			"default": ""

@@ -44,6 +44,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		customAppId,
 		customApiKey,
 		hitsPerPage,
+		enableRouting,
 		attributesToRetrieve,
 		attributesToNotRetrieve,
 		restrictSearchableAttributes,
@@ -181,6 +182,12 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onChange={ ( val ) => setAttributes( { hitsPerPage: val } ) }
 						min={ 1 }
 						max={ 100 }
+					/>
+					<ToggleControl
+						label={ __( 'URL deep linking', 'instantsearch-for-wp' ) }
+						checked={ enableRouting }
+						onChange={ ( val ) => setAttributes( { enableRouting: val } ) }
+						help={ __( 'Save search state to the URL hash so users can share links and return with browser Back.', 'instantsearch-for-wp' ) }
 					/>
 					<TextareaControl
 						label={ __( 'Attributes to retrieve', 'instantsearch-for-wp' ) }
