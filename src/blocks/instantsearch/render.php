@@ -53,6 +53,7 @@ $config_data = [
 	'appId'        => $app_id,
 	'apiKey'       => $api_key,
 	'hitsPerPage'  => (int) ( $attributes['hitsPerPage'] ?? 20 ),
+	'enableRouting' => (bool) ( $attributes['enableRouting'] ?? true ),
 	'distinct'     => $attributes['distinct'] ?? false
 		? (int) ( $attributes['distinctCount'] ?? 1 )
 		: false,

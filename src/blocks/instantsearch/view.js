@@ -8,6 +8,8 @@
 
 import instantsearch from 'instantsearch.js';
 import { algoliasearch } from 'algoliasearch';
+import { history as historyRouter } from 'instantsearch.js/es/lib/routers';
+import { singleIndex } from 'instantsearch.js/es/lib/stateMappings';
 import { applyFilters } from '@wordpress/hooks';
 import {
 	searchBox,
@@ -25,6 +27,97 @@ import {
 } from 'instantsearch.js/es/widgets';
 
 const BLOCK_VISIBILITY_HIDE_CLASS_PREFIX = 'block-visibility-hide-';
+
+function parseRouteParamValue( value ) {
+	if ( ! value ) {
+		return value;
+	}
+
+	if ( ( value.startsWith( '{' ) && value.endsWith( '}' ) ) || ( value.startsWith( '[' ) && value.endsWith( ']' ) ) ) {
+		try {
+			return JSON.parse( value );
+		} catch ( e ) {
+			return value;
+		}
+	}
+
+	return value;
+}
+
+function serializeRouteState( routeState ) {
+	const params = new URLSearchParams();
+
+	if ( ! routeState || typeof routeState !== 'object' ) {
+		return params;
+	}
+
+	Object.entries( routeState ).forEach( ( [ key, value ] ) => {
+		if ( value === undefined || value === null || value === '' ) {
+			return;
+		}
+
+		if ( Array.isArray( value ) ) {
+			value.forEach( ( item ) => {
+				if ( item !== undefined && item !== null && item !== '' ) {
+					params.append( key, String( item ) );
+				}
+			} );
+			return;
+		}
+
+		if ( typeof value === 'object' ) {
+			params.set( key, JSON.stringify( value ) );
+			return;
+		}
+
+		params.set( key, String( value ) );
+	} );
+
+	return params;
+}
+
+function parseRouteStateFromHash( hash ) {
+	const rawHash = typeof hash === 'string' ? hash : '';
+	const normalizedHash = rawHash.startsWith( '#' ) ? rawHash.slice( 1 ) : rawHash;
+	const hashPath = normalizedHash.startsWith( '/' ) ? normalizedHash.slice( 1 ) : normalizedHash;
+
+	if ( ! hashPath ) {
+		return {};
+	}
+
+	const params = new URLSearchParams( hashPath );
+	const routeState = {};
+	const keys = Array.from( new Set( Array.from( params.keys() ) ) );
+
+	keys.forEach( ( key ) => {
+		const values = params.getAll( key ).filter( ( value ) => value !== '' );
+		if ( values.length === 0 ) {
+			return;
+		}
+
+		routeState[ key ] = values.length === 1
+			? parseRouteParamValue( values[ 0 ] )
+			: values.map( ( value ) => parseRouteParamValue( value ) );
+	} );
+
+	return routeState;
+}
+
+function createHashRouter() {
+	return historyRouter( {
+		writeDelay: 400,
+		createURL( { routeState, location } ) {
+			const baseUrl = `${ location.pathname }${ location.search }`;
+			const params = serializeRouteState( routeState );
+			const hashPath = params.toString();
+
+			return hashPath ? `${ baseUrl }#/${ hashPath }` : baseUrl;
+		},
+		parseURL( { location } ) {
+			return parseRouteStateFromHash( location.hash );
+		},
+	} );
+}
 
 function isHiddenByBlockVisibility( element ) {
 	if ( ! element || ! element.classList || typeof window === 'undefined' || ! document.body ) {
@@ -322,11 +415,20 @@ function initInstance( container ) {
 
 	const searchClient = algoliasearch( config.appId, config.apiKey );
 
-	const search = instantsearch( {
+	const searchOptions = {
 		indexName: config.indexName,
 		searchClient,
 		future: { preserveSharedStateOnUnmount: true },
-	} );
+	};
+
+	if ( config.enableRouting !== false ) {
+		searchOptions.routing = {
+			router: createHashRouter(),
+			stateMapping: singleIndex( config.indexName ),
+		};
+	}
+
+	const search = instantsearch( searchOptions );
 
 	// Allow a child hits widget to override hitsPerPage at the widget level.
 	let hitsPerPage = config.hitsPerPage || 20;
